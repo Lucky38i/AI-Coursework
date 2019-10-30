@@ -14,18 +14,21 @@
   <template><srai>HELLO</srai></template> </category>
 
 <category> <pattern> HOW ARE YOU </pattern>
-  <template>I'm functioning within normal parameters, thanks for asking.</template></category>
+  <template>I'm functioning.. well enough</template></category>
 
-<category><pattern> I AM FINE </pattern>
-  <template>That's good to know. What would you like to discuss regarding urban agriculture?</template></category>
+<category><pattern> I AM * </pattern>
+  <template>That's good to know. Me personally? I'm just a bot, I can't feel anything.</template></category>
 
 <category><pattern> BYE </pattern>
-  <template>#0$Bye! Nice talking to you. You take care now.</template></category>
+  <template>#0$Bye! Nice talking to you. You take care now. I'll just be here...</template></category>
 
 <category><pattern> GOODBYE </pattern>
   <template><srai>BYE</srai></template></category>
 
 <category><pattern> EXIT </pattern>
+  <template><srai>BYE</srai></template></category>
+
+<category><pattern>QUIT </pattern>
   <template><srai>BYE</srai></template></category>
 
 <category> <pattern> THANKS </pattern>
@@ -40,12 +43,9 @@
 <category> <pattern> CHEERS * </pattern>
   <template>Sure mate.</template></category>
 
-<!-- Weather API -->
-<category><pattern> WHAT IS THE WEATHER LIKE IN * </pattern>
-  <template>#2$<star/></template></category>
+<!-- Weather Questions -->
 
-<category><pattern> HOW IS THE WEATHER IN * </pattern>
-  <template><srai>WHAT IS THE WEATHER LIKE IN <star/></srai></template></category>
+<!-- Event Specific WW2 Weather -->
 
 <!--- Wikipedia API -->
 <category><pattern> WHAT IS A * </pattern>
