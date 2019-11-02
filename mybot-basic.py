@@ -1,17 +1,19 @@
-﻿#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Basic chatbot design --- for your own modifications
-"""
-#######################################################
-# Initialise Wikipedia agent
+﻿#######################################################
+# Imports
 #######################################################
 import aiml
-import json
-import requests
+import string
 import wikipediaapi
 import configparser
 import os
+import io
+import nltk
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import warnings
+
+# Unsafe
+warnings.filterwarnings("ignore")
 
 #######################################################
 # Initialise config parser
@@ -23,34 +25,83 @@ wiki_wiki = wikipediaapi.Wikipedia('en')
 wikipediaapi.log.setLevel(level=wikipediaapi.logging.ERROR)
 
 #######################################################
-# Initialise weather agent
+# Initialise NLTK Agent
 #######################################################
-APIkey = config['OPENWEATHERMAP']['ApiKey']
+data = "data.txt"
+readFile = io.open(data, 'r')
+corpus = readFile.read()
+lowerCorpus = corpus.lower()
+
+# Uncomment these on first run
+# nltk.download('punkt')
+# nltk.download('wordnet')
+
+corpal_sentences = nltk.sent_tokenize(lowerCorpus)
+corpal_words = nltk.word_tokenize(lowerCorpus)
+
+#######################################################
+# Normalize tokens using Lemmatization
+#######################################################
+lemmer = nltk.stem.WordNetLemmatizer()
+
+
+def LemTokens(tokens):
+    lemmedTokens = []
+    for token in tokens:
+        lemmedTokens.append(lemmer.lemmatize(token))
+
+    return lemmedTokens
+
+
+# Dictionary of punctuations in unicode
+remove_punct_dict = {}
+for punctuation in string.punctuation:
+    remove_punct_dict[ord(punctuation)] = None
+
+
+def lemNormalize(text):
+    return LemTokens(nltk.word_tokenize(text.lower().translate(remove_punct_dict)))
+
+
+#######################################################
+#  Similarity-Based Response Generation
+#######################################################
+def response(user_response):
+    chatBot_Response = ""
+    corpal_sentences.append(user_response)
+    tfidf = TfidfVectorizer(tokenizer=lemNormalize, stop_words='english').fit_transform(corpal_sentences)
+    cosSimiliarity = cosine_similarity(tfidf[-1], tfidf)
+    idx = cosSimiliarity.argsort()[0][-2]
+    flat = cosSimiliarity.flatten()
+    flat.sort()
+    req_tfidf = flat[-2]
+    if req_tfidf == 0:
+        chatBot_Response += "Sorry, I don't know what that is"
+        return chatBot_Response
+    else:
+        # TODO parse response to remove the found keyword
+        chatBot_Response += corpal_sentences[idx]
+        return chatBot_Response
+
 
 #######################################################
 #  Initialise AIML agent
 #######################################################
-# Create a Kernel object. No string encoding (all I/O is unicode)
 kern = aiml.Kernel()
 kern.setTextEncoding(None)
-# Use the Kernel's bootstrap() method to initialize the Kernel. The
-# optional learnFiles argument is a file (or list of files) to load.
-# The optional commands argument is a command (or list of commands)
-# to run after the files are loaded.
-# The optional brainFile argument specifies a brain file to load.
 brain = "brain.brn"
 if os.path.isfile(brain):
     kern.bootstrap(brainFile=brain)
 else:
-    kern.bootstrap(learnFiles="std-startup.xml", commands="LOAD AIML")
+    kern.bootstrap(learnFiles="std-startup.xml", commands="LOAD BRAIN")
     kern.saveBrain(brain)
 
 #######################################################
 # Welcome user
 #######################################################
-welcomeMessage = ("Welcome to the Forrest Gump Foodie Chat Bot"
-                  "Ask me anything about Bubba Buford's wild list of shrimp"
-                  "creations!")
+welcomeMessage = ("Welcome to the Cayman Islands Chat Bot!"
+                  "Ask me anything about the Cayman islands including"
+                  "it's geography, national animals and so on")
 print(welcomeMessage)
 #######################################################
 # Main loop
@@ -72,9 +123,9 @@ while True:
             print(params[1])
             break
         elif cmd == 10:
-            # TODO implement NLTK
-            print("Test")
-            break
+            print("Let me think..", end="")
+            print(response(userInput))
+            corpal_sentences.remove(userInput)
         elif cmd == 99:
             print("Sorry repeat that please")
     else:

@@ -1,8 +1,8 @@
 <aiml version="1.0.1" encoding="UTF-8">
     <category>
-        <pattern>LOAD AIML</pattern>
+        <pattern>LOAD BRAIN</pattern>
         <template>
-            <learn>mybot-basic.xml</learn>
+            <learn>brain.aiml</learn>
         </template>
     </category>
 </aiml>
