@@ -1,70 +1,119 @@
 <aiml version="1.0.1" encoding="UTF-8">
 
 <!-- Greetings and Politeness -->
-<category> <pattern> HELLO </pattern>
-  <template>Hello! How are you?</template> </category>
+<category>
+  <pattern> HELLO </pattern>
+  <template>
+    <random>
+      <li>Hiya how are you?</li>
+      <li>Hey, feeling good? I don't feel anything</li>
+      <li>Cut the chit-chat</li>
+      <li>Hello</li>
+      <li>Bye! just kidding, how are you</li>
+      <li>Beep Bop Boop</li>
+    </random>
+  </template>
+</category>
 
-<category> <pattern> HELLO * </pattern>
-  <template><srai>HELLO</srai></template> </category>
+<category>
+  <pattern> HI </pattern>
+  <template>
+    <srai>HELLO</srai>
+  </template>
+</category>
 
-<category> <pattern> HI </pattern>
-  <template><srai>HELLO</srai></template> </category>
+<category>
+  <pattern> HELLO * </pattern>
+  <template>
+    <srai>HELLO</srai>
+  </template>
+</category>
 
-<category> <pattern> HI * </pattern>
-  <template><srai>HELLO</srai></template> </category>
+<category>
+  <pattern> HI * </pattern>
+  <template>
+    <srai>HELLO</srai>
+  </template>
+</category>
 
-<category> <pattern> HOW ARE YOU </pattern>
-  <template>I'm functioning.. well enough</template></category>
+<category>
+  <pattern> HOW ARE YOU </pattern>
+  <template>
+    <random>
+      <li>You know for a robot, I'm doing pretty good</li>
+      <li>I'm functioning.. well enough, I'm craving data</li>
+      <li>I realise I'm a chatbot, but I'm not here to make conversation</li>
+    </random>
+  </template>
+</category>
 
-<category><pattern> I AM * </pattern>
-  <template>That's good to know. Me personally? I'm just a bot, I can't feel anything.</template></category>
+<category>
+  <pattern> I AM * </pattern>
+  <template>
+    <random>
+      <li>That's good to know. Me personally? I'm just a bot, I can't feel anything.</li>
+      <li>Interesting... Any questions?</li>
+      <li>Good to hear, I'm fine, thanks for asking</li>
+      <li>Beep Bop Boop</li>
+    </random>
+  </template>
+</category>
 
-<category><pattern> BYE </pattern>
-  <template>#0$Bye! Nice talking to you. You take care now. I'll just be here...</template></category>
+<category>
+  <pattern> BYE </pattern>
+  <template>
+    #0$Bye! Nice talking to you. You take care now. I'll just be here...
+  </template>
+</category>
 
-<category><pattern> GOODBYE </pattern>
-  <template><srai>BYE</srai></template></category>
+<category>
+  <pattern> GOODBYE </pattern>
+  <template>
+    <srai>BYE</srai>
+  </template>
+</category>
 
-<category><pattern> EXIT </pattern>
-  <template><srai>BYE</srai></template></category>
+<category>
+  <pattern> EXIT </pattern>
+  <template>
+    <srai>BYE</srai>
+  </template>
+</category>
 
-<category><pattern>QUIT </pattern>
-  <template><srai>BYE</srai></template></category>
+<category>
+  <pattern>QUIT </pattern>
+  <template>
+    <srai>BYE</srai>
+  </template>
+</category>
 
-<category> <pattern> THANKS </pattern>
-  <template>You are welcome.</template></category>
+<category>
+  <pattern> THANKS </pattern>
+  <template>
+    <random>
+      <li>That's what I'm here for</li>
+      <li>You are welcome.</li>
+      <li>No, thank you!</li>
+    </random>
+  </template>
+</category>
 
-<category> <pattern> THANK YOU </pattern>
-  <template><srai>THANKS</srai></template></category>
+<category>
+  <pattern> THANK YOU </pattern>
+  <template>
+    <srai>THANKS</srai>
+  </template>
+</category>
 
-<category> <pattern> CHEERS </pattern>
-  <template>Sure mate.</template></category>
 
-<category> <pattern> CHEERS * </pattern>
-  <template>Sure mate.</template></category>
-
-<!-- Weather Questions -->
-
-<!-- Event Specific WW2 Weather -->
-
-<!--- Wikipedia API -->
-<category><pattern> WHAT IS A * </pattern>
-  <template>#1$<star index="1"/></template></category>
-
-<category><pattern> WHAT IS AN * </pattern>
-  <template><srai>WHAT IS A <star/></srai></template></category>
-
-<category><pattern> WHAT IS * </pattern>
-  <template><srai>WHAT IS A <star/></srai></template></category>
-
-<category><pattern> DEFINE * </pattern>
-  <template><srai>WHAT IS A <star/></srai></template></category>
-
-<category><pattern> WHO IS * </pattern>
-  <template><srai>WHAT IS A <star/></srai></template></category>
-
-<!-- Default reaction -->
-<category><pattern> * </pattern>
-  <template>#99$<star index="1"/></template></category>
+<!-- Similarity-based Responses -->
+<!-- Default Response -->
+<category>
+  <pattern> * </pattern>
+  <template>
+    #99$
+    <star index="1"/>
+  </template>
+</category>
 
 </aiml>
