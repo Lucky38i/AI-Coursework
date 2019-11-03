@@ -80,7 +80,7 @@ def response(user_response):
         return chatBot_Response
     else:
         # TODO parse response to remove the found keyword
-        chatBot_Response += corpal_sentences[idx]
+        chatBot_Response += "\t" + corpal_sentences[idx].split("\n")[1]
         return chatBot_Response
 
 
