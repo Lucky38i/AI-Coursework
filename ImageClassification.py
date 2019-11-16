@@ -1,83 +1,64 @@
-import numpy
-from keras.models import Sequential, load_model
-from keras.layers import Dense, Dropout, Flatten, BatchNormalization
-from keras.layers.convolutional import Conv2D, MaxPooling2D
-from keras.constraints import maxnorm
-from keras.utils import np_utils
-from keras.datasets import cifar10
+from keras import Sequential
 from keras.callbacks import ModelCheckpoint
+from keras.layers import Conv2D, Activation, MaxPooling2D, Dropout, Flatten, Dense
+from keras_preprocessing.image import ImageDataGenerator, load_img
 
-seed = 21
-(X_train, y_train), (X_test, y_test) = cifar10.load_data()
-X_train = X_train.astype('float32')
-X_test = X_test.astype('float32')
-X_train = X_train / 255.0
-X_test = X_test / 255.0
 
-y_train = np_utils.to_categorical(y_train)
-y_test = np_utils.to_categorical(y_test)
-class_num = y_test.shape[1]
+train_dir = "data/fruits-360_dataset/fruits-360/Training"
+test_dir = "data/fruits-360_dataset/fruits-360/Test"
+batch_size = 32
+
+train_datagen = ImageDataGenerator(rescale=1. / 255,
+                                   shear_range=0.2,
+                                   zoom_range=0.2,
+                                   horizontal_flip=True)
+
+test_datagen = ImageDataGenerator(rescale=1. / 255)
+
+train_generator = train_datagen.flow_from_directory(train_dir, target_size=(100, 100))
+test_generator = test_datagen.flow_from_directory(test_dir, target_size=(100, 100))
+label_map = test_generator.class_indices
 
 model = Sequential()
 
-# First Convolutional Layer
-model.add(Conv2D(32, (3,3), input_shape=X_train.shape[1:],
-                 padding='same', activation='relu'))
+model.add(Conv2D(filters=16, kernel_size=2, input_shape=(100, 100, 3), padding='same'))
+model.add(Activation('relu'))
+model.add(MaxPooling2D(pool_size=2))
 
-# Drop 20% of existing connection to preventing overfitting
-model.add(Dropout(0.2))
+model.add(Conv2D(filters=32, kernel_size=2, activation='relu', padding='same'))
+model.add(MaxPooling2D(pool_size=2))
 
-# Normalise inputs going into next layer
-model.add(BatchNormalization())
+model.add(Conv2D(filters=64, kernel_size=2, activation='relu', padding='same'))
+model.add(MaxPooling2D(pool_size=2))
 
-# Second Convolutional Layer (Increased Filter) to learn more complex representations
-model.add(Conv2D(64, (3,3), padding='same', activation='relu'))
+model.add(Conv2D(filters=128, kernel_size=2, activation='relu', padding='same'))
+model.add(MaxPooling2D(pool_size=2))
 
-# Add Pooling layer to abstract unnecessary parts of image with max pooling
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.2))
-model.add(BatchNormalization())
-
-# Third Convlutional Layer (Increased Filter) to learn more complex representations
-model.add(Conv2D(128, (3,3), padding='same', activation='relu'))
-model.add(Dropout(0.2))
-model.add(BatchNormalization())
-
-# Flatten the data to a vector to be processed
+model.add(Dropout(0.3))
 model.add(Flatten())
-model.add(Dropout(0.2))
+model.add(Dense(256))
+model.add(Activation('relu'))
+model.add(Dropout(0.4))
+model.add(Dense(120, activation='softmax'))
+model.summary()
 
-# 1st Dense layer with kernel constraint to prevent overfitting
-model.add(Dense(256, kernel_constraint=maxnorm(3), activation='relu'))
-model.add(Dropout(0.2))
-model.add(BatchNormalization())
+model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=['accuracy'])
 
-# 2nd Dense layer with kernel constraint to prevent overfitting
-model.add(Dense(128, kernel_constraint=maxnorm(3), activation='relu'))
-model.add(Dropout(0.2))
-model.add(BatchNormalization())
+batch_size = 32
+epochs = 30
 
-# 3rd Dense layer representing number of classes with softmax to select high probability as output
-model.add(Dense(class_num, activation='softmax'))
-
-epochs = 10
-optimizer = 'adam'
-
-model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
-
-filepath = "model.h5"
-checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='min')
-callbacks_list = [checkpoint]
+checkpointer = ModelCheckpoint(filepath='cnn.hdf5', verbose=1, save_best_only=True)
 
 
-numpy.random.seed(seed)
-model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=epochs, batch_size=64, callbacks=callbacks_list)
-score = model.evaluate(X_test, y_test, verbose=0)
-print("ACCURACY: %.2f%%" % (score[1]*100))
+model.fit_generator(train_generator,
+                    epochs=30,
+                    steps_per_epoch=train_generator.samples / batch_size,
+                    validation_steps=test_generator.samples / batch_size,
+                    validation_data=test_generator,
+                    callbacks=[checkpointer],
+                    verbose=1, shuffle=True)
 
-''' Uncomment this to continue model
-load_model = load_model("model.h5")
-checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='min')
-callbacks_list = [checkpoint]
-load_model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=epochs, batch_size=64, callbacks=callbacks_list)
-'''
+
+score = model.evaluate_generator(test_generator, verbose=1)
+print('Test Accuracy: ', score[1])
+

@@ -174,3 +174,4 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+/data/fruits-360_dataset

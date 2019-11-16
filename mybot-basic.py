@@ -1,40 +1,58 @@
 ﻿#######################################################
 # Imports
 #######################################################
-import aiml
-import string
-import wikipediaapi
 import configparser
-import os
 import io
+import os
+import string
+import warnings
+import aiml
 import nltk
+import numpy as np
+import wikipediaapi
+from keras.models import load_model
+from keras_preprocessing import image
+from keras_preprocessing.image import ImageDataGenerator
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import warnings
 
 # Unsafe
 warnings.filterwarnings("ignore")
-
 #######################################################
-# Initialise config parser
+# Initialise Keras Model
 #######################################################
-config = configparser.ConfigParser()
-config.read('config.ini')
+test_dir = "data/fruits-360_dataset/fruits-360/Test"
+test_datagen = ImageDataGenerator(rescale=1. / 255)
+test_generator = test_datagen.flow_from_directory(test_dir, target_size=(100, 100))
+label_map = test_generator.class_indices
 
-wiki_wiki = wikipediaapi.Wikipedia('en')
-wikipediaapi.log.setLevel(level=wikipediaapi.logging.ERROR)
+model = load_model("data/models/cnn.hdf5")
 
+# TODO Figure out why the model has such a poor prediction
+# TODO implement this in chat loop
+"""
+img = image.load_img("data/upload/bananas.jpg", target_size=(100, 100))
+y = image.img_to_array(img)
+y = np.expand_dims(y, axis=0)
+
+
+images = np.vstack([y])
+classes = model.predict_classes(images, batch_size=10)
+for label, num in label_map.items():
+    if num == classes:
+        print("I think this is a:", label)
+        """
 #######################################################
 # Initialise NLTK Agent
 #######################################################
-data = "data.txt"
+data = "data/data.txt"
 readFile = io.open(data, 'r')
 corpus = readFile.read()
 lowerCorpus = corpus.lower()
 
 # Uncomment these on first run
-# nltk.download('punkt')
-# nltk.download('wordnet')
+nltk.download('punkt')
+nltk.download('wordnet')
 
 corpal_sentences = nltk.sent_tokenize(lowerCorpus)
 corpal_words = nltk.word_tokenize(lowerCorpus)
@@ -89,7 +107,7 @@ def response(user_response):
 #######################################################
 kern = aiml.Kernel()
 kern.setTextEncoding(None)
-brain = "brain.brn"
+brain = "data/models/brain.brn"
 if os.path.isfile(brain):
     kern.bootstrap(brainFile=brain)
 else:
