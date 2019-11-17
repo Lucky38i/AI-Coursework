@@ -59,7 +59,7 @@ if __name__ == '__main__':
     class_num = train_generator.num_classes
     image_shape = test_generator.image_shape
 
-    # TODO figure out why the model isn't being loaded correctly, or is it?
+    # TODO Checkpoint doesn't save Metrics, find a way to save it
 
     # Load existing model if it exists otherwise build new model
     if os.path.isfile(checkpoint_file):
@@ -73,7 +73,7 @@ if __name__ == '__main__':
         model.compile(loss="categorical_crossentropy", optimizer="rmsprop", metrics=['accuracy'])
         model.summary()
 
-    checkpointer = ModelCheckpoint(filepath=checkpoint_file, verbose=1, save_best_only=True)
+    checkpointer = ModelCheckpoint(filepath=checkpoint_file, verbose=1, save_best_only=True, save_weights_only=False)
 
     model.fit_generator(train_generator,
                         steps_per_epoch=train_generator.samples // batch_size,
