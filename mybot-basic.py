@@ -26,10 +26,9 @@ test_datagen = ImageDataGenerator(rescale=1. / 255)
 test_generator = test_datagen.flow_from_directory(test_dir, target_size=(100, 100))
 label_map = test_generator.class_indices
 
-model = load_model("data/models/cnn.hdf5")
+model = load_model("data/models/pani_cnn.hdf5")
 
-# TODO Figure out why the model has such a poor prediction
-# TODO implement this in chat loop
+# Implement this in main loop
 """
 img = image.load_img("data/upload/bananas.jpg", target_size=(100, 100))
 y = image.img_to_array(img)
