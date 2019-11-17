@@ -1,15 +1,44 @@
-from multiprocessing import freeze_support
+import os.path
 
 from keras import Sequential
 from keras.callbacks import ModelCheckpoint
-from keras.constraints import maxnorm
-from keras.layers import Conv2D, Activation, MaxPooling2D, Dropout, Flatten, Dense, BatchNormalization
-from keras_preprocessing.image import ImageDataGenerator, load_img
+from keras.layers import Conv2D, Activation, MaxPooling2D, Dropout, Flatten, Dense
+from keras.models import load_model
+from keras_preprocessing.image import ImageDataGenerator
+
+
+def build_model():
+    temp_model = Sequential()
+
+    temp_model.add(Conv2D(filters=16, kernel_size=3, input_shape=image_shape, padding='same'))
+    temp_model.add(Activation('relu'))
+    temp_model.add(MaxPooling2D(pool_size=2))
+
+    temp_model.add(Conv2D(filters=32, kernel_size=3, activation='relu', padding='same'))
+    temp_model.add(MaxPooling2D(pool_size=2))
+
+    temp_model.add(Conv2D(filters=64, kernel_size=3, activation='relu', padding='same'))
+    temp_model.add(MaxPooling2D(pool_size=2))
+
+    temp_model.add(Conv2D(filters=128, kernel_size=2, activation='relu', padding='same'))
+    temp_model.add(MaxPooling2D(pool_size=2))
+    temp_model.add(Dropout(0.3))
+
+    temp_model.add(Flatten())
+
+    temp_model.add(Dense(128, activation='relu'))
+    temp_model.add(Dropout(0.4))
+
+    temp_model.add(Dense(class_num, activation='softmax'))
+
+    return temp_model
+
 
 if __name__ == '__main__':
     train_dir = "data/fruits-360_dataset/fruits-360/Training"
     test_dir = "data/fruits-360_dataset/fruits-360/Test"
-    batch_size = 128
+    checkpoint_file = 'data/models/pani_rmsprop_cnn.hdf5'
+    batch_size = 32
     epochs = 30
 
     train_datagen = ImageDataGenerator(rotation_range=40,
@@ -30,59 +59,25 @@ if __name__ == '__main__':
     class_num = train_generator.num_classes
     image_shape = test_generator.image_shape
 
-    model = Sequential()
-    """ CNN From Anindita Pani
-    model.add(Conv2D(filters=16, kernel_size=2, input_shape=(100, 100, 3), padding='same'))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=2))
-    
-    model.add(Conv2D(filters=32, kernel_size=2, activation='relu', padding='same'))
-    model.add(MaxPooling2D(pool_size=2))
-    
-    model.add(Conv2D(filters=64, kernel_size=2, activation='relu', padding='same'))
-    model.add(MaxPooling2D(pool_size=2))
-    
-    model.add(Conv2D(filters=128, kernel_size=2, activation='relu', padding='same'))
-    model.add(MaxPooling2D(pool_size=2))
-    
-    model.add(Dropout(0.3))
-    model.add(Flatten())
-    model.add(Dense(256))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.4))
-    model.add(Dense(120, activation='softmax'))
-    """
+    # TODO figure out why the model isn't being loaded correctly, or is it?
 
+    # Load existing model if it exists otherwise build new model
+    if os.path.isfile(checkpoint_file):
+        print("Loading existing model")
+        model = load_model(checkpoint_file)
+        model.load_weights(checkpoint_file)
+        model.summary()
+    else:
+        print("Creating new model")
+        model = build_model()
+        model.compile(loss="categorical_crossentropy", optimizer="rmsprop", metrics=['accuracy'])
+        model.summary()
 
-    model.add(Conv2D(filters=8, kernel_size=(5, 5), padding="Same", activation="relu", input_shape=image_shape))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
-
-    model.add(Conv2D(filters=16, kernel_size=(4, 4), padding="Same", activation="relu"))
-    model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-    model.add(Dropout(0.25))
-
-    model.add(Conv2D(filters=32, kernel_size=(4, 4), padding="Same", activation="relu"))
-    model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-    model.add(Dropout(0.25))
-
-    model.add(Flatten())
-
-    model.add(Dense(512, activation="relu"))
-    model.add(Dropout(0.5))
-    model.add(Dense(class_num, activation="softmax"))
-
-    model.summary()
-
-    model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=['accuracy'])
-
-    
-
-    checkpointer = ModelCheckpoint(filepath='data/models/stack_cnn.hdf5', verbose=1, save_best_only=True)
+    checkpointer = ModelCheckpoint(filepath=checkpoint_file, verbose=1, save_best_only=True)
 
     model.fit_generator(train_generator,
                         steps_per_epoch=train_generator.samples // batch_size,
-                        epochs=30,
+                        epochs=epochs,
                         verbose=1,
                         callbacks=[checkpointer],
                         validation_data=test_generator,
