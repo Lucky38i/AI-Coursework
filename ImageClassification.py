@@ -1,7 +1,7 @@
 import os.path
 
 from keras import Sequential
-from keras.callbacks import ModelCheckpoint
+from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.layers import Conv2D, Activation, MaxPooling2D, Dropout, Flatten, Dense
 from keras.models import load_model
 from keras_preprocessing.image import ImageDataGenerator
@@ -40,9 +40,9 @@ def build_model():
 if __name__ == '__main__':
     train_dir = "data/fruits-360_dataset/fruits-360/Training"
     test_dir = "data/fruits-360_dataset/fruits-360/Test"
-    checkpoint_file = 'data/models/pani_adam_cnn.hdf5'
+    checkpoint_file = 'data/models/pani_adam_200_cnn.hdf5'
     batch_size = 32
-    epochs = 30
+    epochs = 200
 
     train_datagen = ImageDataGenerator(rotation_range=40,
                                        width_shift_range=0.2,
@@ -73,13 +73,13 @@ if __name__ == '__main__':
         model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=['accuracy'])
         model.summary()
 
-    checkpointer = ModelCheckpoint(filepath=checkpoint_file, verbose=1, save_best_only=True, save_weights_only=False)
+    callbacks = [EarlyStopping(monitor='val_loss', patience=2),ModelCheckpoint(filepath=checkpoint_file, verbose=1, save_best_only=True, save_weights_only=False)]
 
     model.fit_generator(train_generator,
                         steps_per_epoch=train_generator.samples // batch_size,
                         epochs=epochs,
                         verbose=1,
-                        callbacks=[checkpointer],
+                        callbacks=callbacks,
                         validation_data=test_generator,
                         validation_steps=test_generator.samples // batch_size,
                         shuffle=True)
