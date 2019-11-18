@@ -37,7 +37,7 @@ def build_model():
 if __name__ == '__main__':
     train_dir = "data/fruits-360_dataset/fruits-360/Training"
     test_dir = "data/fruits-360_dataset/fruits-360/Test"
-    checkpoint_file = 'data/models/pani_rmsprop_cnn.hdf5'
+    checkpoint_file = 'data/models/pani_adam_cnn.hdf5'
     batch_size = 32
     epochs = 30
 
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     else:
         print("Creating new model")
         model = build_model()
-        model.compile(loss="categorical_crossentropy", optimizer="rmsprop", metrics=['accuracy'])
+        model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=['accuracy'])
         model.summary()
 
     checkpointer = ModelCheckpoint(filepath=checkpoint_file, verbose=1, save_best_only=True, save_weights_only=False)
