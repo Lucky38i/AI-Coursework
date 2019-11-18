@@ -142,6 +142,22 @@
   </template>
 </category>
 
+
+<!-- Image Classification -->
+<category>
+  <pattern> TELL ME ABOUT THE PICTURE * </pattern>
+  <template>
+    #11$ <star index="1"/>
+  </template>
+</category>
+
+<category>
+  <pattern> WHAT IS THE PICTURE * </pattern>
+  <template>
+    <srai> TELL ME ABOUT THE PICTURE <star index="1"/></srai>
+  </template>
+</category>
+
 <!-- Default Response -->
 <category>
   <pattern> * </pattern>

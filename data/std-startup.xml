@@ -2,7 +2,7 @@
     <category>
         <pattern>LOAD BRAIN</pattern>
         <template>
-            <learn>brain.aiml</learn>
+            <learn>data/brain.aiml</learn>
         </template>
     </category>
 </aiml>

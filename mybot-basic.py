@@ -1,20 +1,19 @@
 ﻿#######################################################
 # Imports
 #######################################################
-import configparser
 import io
 import os
 import string
 import warnings
+
 import aiml
 import nltk
-import numpy as np
-import wikipediaapi
 from keras.models import load_model
-from keras_preprocessing import image
 from keras_preprocessing.image import ImageDataGenerator
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+
+from ImageTest import preprocess_image
 
 # Unsafe
 warnings.filterwarnings("ignore")
@@ -22,25 +21,13 @@ warnings.filterwarnings("ignore")
 # Initialise Keras Model
 #######################################################
 test_dir = "data/fruits-360_dataset/fruits-360/Test"
-test_datagen = ImageDataGenerator(rescale=1. / 255)
+model_dir = "data/models/pani_rmsprop_cnn.hdf5"
+test_datagen = ImageDataGenerator(rescale=1 / 255)
 test_generator = test_datagen.flow_from_directory(test_dir, target_size=(100, 100))
 label_map = test_generator.class_indices
 
-model = load_model("data/models/pani_cnn.hdf5")
+model = load_model(model_dir)
 
-# Implement this in main loop
-"""
-img = image.load_img("data/upload/bananas.jpg", target_size=(100, 100))
-y = image.img_to_array(img)
-y = np.expand_dims(y, axis=0)
-
-
-images = np.vstack([y])
-classes = model.predict_classes(images, batch_size=10)
-for label, num in label_map.items():
-    if num == classes:
-        print("I think this is a:", label)
-        """
 #######################################################
 # Initialise NLTK Agent
 #######################################################
@@ -50,8 +37,8 @@ corpus = readFile.read()
 lowerCorpus = corpus.lower()
 
 # Uncomment these on first run
-nltk.download('punkt')
-nltk.download('wordnet')
+# nltk.download('punkt')
+# nltk.download('wordnet')
 
 corpal_sentences = nltk.sent_tokenize(lowerCorpus)
 corpal_words = nltk.word_tokenize(lowerCorpus)
@@ -106,19 +93,22 @@ def response(user_response):
 #######################################################
 kern = aiml.Kernel()
 kern.setTextEncoding(None)
-brain = "data/models/brain.brn"
-if os.path.isfile(brain):
-    kern.bootstrap(brainFile=brain)
+braindir = "data/models/brain.brn"
+if os.path.isfile(braindir):
+    kern.bootstrap(brainFile=braindir)
 else:
     kern.bootstrap(learnFiles="std-startup.xml", commands="LOAD BRAIN")
-    kern.saveBrain(brain)
+    kern.saveBrain(braindir)
 
 #######################################################
 # Welcome user
 #######################################################
 welcomeMessage = ("Welcome to the Cayman Islands Chat Bot!"
-                  "Ask me anything about the Cayman islands including"
-                  "it's geography, national animals and so on")
+                  "\nAsk me anything about the Cayman islands including"
+                  " it's geography, national animals and so on."
+                  "\n\n** NEW UPDATE **"
+                  "\n\nMy owner has now trained me on over 60k images of fruits! Upload images in .jpg format to the"
+                  " upload folder and I'll try and predict what it is!")
 print(welcomeMessage)
 #######################################################
 # Main loop
@@ -143,6 +133,15 @@ while True:
             print("Let me think..", end="")
             print(response(userInput))
             corpal_sentences.remove(userInput)
+        elif cmd == 11:
+            uploaddir = "data/upload/"
+            filetype = ".jpg"
+            img_tensor = preprocess_image(uploaddir + userInput + filetype)
+            classes = model.predict_classes(img_tensor)
+            for label, num in label_map.items():
+                if num == classes:
+                    print("I think this is a:", label)
+
         elif cmd == 99:
             print("Sorry repeat that please")
     else:
