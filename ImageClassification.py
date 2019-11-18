@@ -56,8 +56,10 @@ if __name__ == '__main__':
 
     test_datagen = ImageDataGenerator(rescale=1 / 255)
 
-    train_generator = train_datagen.flow_from_directory(train_dir, target_size=(100, 100))
-    test_generator = test_datagen.flow_from_directory(test_dir, target_size=(100, 100))
+    train_generator = train_datagen.flow_from_directory(train_dir, target_size=(100, 100),
+                                                        batch_size=batch_size, shuffle=True)
+    test_generator = test_datagen.flow_from_directory(test_dir, target_size=(100, 100),
+                                                      batch_size=batch_size, shuffle=True)
     label_map = test_generator.class_indices
     class_num = train_generator.num_classes
     image_shape = test_generator.image_shape
@@ -73,7 +75,7 @@ if __name__ == '__main__':
         model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=['accuracy'])
         model.summary()
 
-    callbacks = [EarlyStopping(monitor='val_loss', patience=2),ModelCheckpoint(filepath=checkpoint_file, verbose=1, save_best_only=True, save_weights_only=False)]
+    callbacks = [ModelCheckpoint(filepath=checkpoint_file, verbose=1, save_best_only=True, save_weights_only=False)]
 
     model.fit_generator(train_generator,
                         steps_per_epoch=train_generator.samples // batch_size,

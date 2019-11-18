@@ -22,7 +22,7 @@ def preprocess_image(file_dir, show=False):
 
 if __name__ == '__main__':
     test_dir = "data/fruits-360_dataset/fruits-360/Test"
-    checkpoint_file = 'data/models/pani_adam_cnn.hdf5'
+    checkpoint_file = 'data/models/pani_adam_200_cnn.hdf5'
 
     test_datagen = ImageDataGenerator(rescale=1 / 255)
     test_generator = test_datagen.flow_from_directory(test_dir, target_size=(100, 100))
