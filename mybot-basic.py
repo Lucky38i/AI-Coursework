@@ -9,9 +9,12 @@ import warnings
 import aiml
 import nltk
 from keras.models import load_model
+
+from keras.backend import get_session
 from keras_preprocessing.image import ImageDataGenerator
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import tensorflow as tf
 
 from ImageTest import preprocess_image
 
@@ -22,13 +25,18 @@ warnings.filterwarnings("ignore")
 # Initialise Keras Model
 #######################################################
 test_dir = "data/fruits-360_dataset/fruits-360/Test"
-model_dir = "data/models/pani_rmsprop_cnn.hdf5"
+model_dir = "data/models/pani_adam_cnn.hdf5"
 
 test_datagen = ImageDataGenerator(rescale=1 / 255)
 test_generator = test_datagen.flow_from_directory(test_dir, target_size=(100, 100))
 label_map = test_generator.class_indices
 
 model = load_model(model_dir)
+
+saver = tf.compat.v1.train.Saver()
+sess = get_session()
+saver.restore(sess, 'data/keras_session/session.ckpt')
+
 
 #######################################################
 # Initialise NLTK Agent
@@ -143,10 +151,10 @@ while True:
             filetype = ".jpg"
             file = userInput.split(" ")
             img_tensor = preprocess_image(uploaddir + file[len(file) - 1] + filetype)
-            classes = model.predict_classes(img_tensor)
+            classes = model.predict_classes(img_tensor, verbose=1)
             for label, num in label_map.items():
                 if num == classes:
-                    print("Uhhh... This looks like a(n) ", label)
+                    print("Uhhh... This looks like (a)", label)
 
         elif cmd == 99:
             print("Sorry repeat that please")

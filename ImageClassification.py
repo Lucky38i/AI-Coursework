@@ -5,6 +5,9 @@ from keras.callbacks import ModelCheckpoint
 from keras.layers import Conv2D, Activation, MaxPooling2D, Dropout, Flatten, Dense
 from keras.models import load_model
 from keras_preprocessing.image import ImageDataGenerator
+from keras.backend import get_session
+import tensorflow as tf
+
 
 # TODO Determine a viable model to produce useful results on unseen data
 def build_model():
