@@ -15,6 +15,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 from ImageTest import preprocess_image
 
+
 # Unsafe
 warnings.filterwarnings("ignore")
 #######################################################
@@ -22,6 +23,7 @@ warnings.filterwarnings("ignore")
 #######################################################
 test_dir = "data/fruits-360_dataset/fruits-360/Test"
 model_dir = "data/models/pani_rmsprop_cnn.hdf5"
+
 test_datagen = ImageDataGenerator(rescale=1 / 255)
 test_generator = test_datagen.flow_from_directory(test_dir, target_size=(100, 100))
 label_map = test_generator.class_indices
@@ -49,12 +51,12 @@ corpal_words = nltk.word_tokenize(lowerCorpus)
 lemmer = nltk.stem.WordNetLemmatizer()
 
 
-def LemTokens(tokens):
-    lemmedTokens = []
+def lem_tokens(tokens):
+    lemmed_tokens = []
     for token in tokens:
-        lemmedTokens.append(lemmer.lemmatize(token))
+        lemmed_tokens.append(lemmer.lemmatize(token))
 
-    return lemmedTokens
+    return lemmed_tokens
 
 
 # Dictionary of punctuations in unicode
@@ -63,8 +65,8 @@ for punctuation in string.punctuation:
     remove_punct_dict[ord(punctuation)] = None
 
 
-def lemNormalize(text):
-    return LemTokens(nltk.word_tokenize(text.lower().translate(remove_punct_dict)))
+def lem_normalize(text):
+    return lem_tokens(nltk.word_tokenize(text.lower().translate(remove_punct_dict)))
 
 
 #######################################################
@@ -73,10 +75,10 @@ def lemNormalize(text):
 def response(user_response):
     chatBot_Response = ""
     corpal_sentences.append(user_response)
-    tfidf = TfidfVectorizer(tokenizer=lemNormalize, stop_words='english').fit_transform(corpal_sentences)
-    cosSimiliarity = cosine_similarity(tfidf[-1], tfidf)
-    idx = cosSimiliarity.argsort()[0][-2]
-    flat = cosSimiliarity.flatten()
+    tfidf = TfidfVectorizer(tokenizer=lem_normalize, stop_words='english').fit_transform(corpal_sentences)
+    cos_similarity = cosine_similarity(tfidf[-1], tfidf)
+    idx = cos_similarity.argsort()[0][-2]
+    flat = cos_similarity.flatten()
     flat.sort()
     req_tfidf = flat[-2]
     if req_tfidf == 0:
@@ -91,14 +93,17 @@ def response(user_response):
 #######################################################
 #  Initialise AIML agent
 #######################################################
+brain_dir = "data/models/brain.brn"
+startup_dir = "data/std-startup.xml"
+
 kern = aiml.Kernel()
 kern.setTextEncoding(None)
-braindir = "data/models/brain.brn"
-if os.path.isfile(braindir):
-    kern.bootstrap(brainFile=braindir)
+
+if os.path.isfile(brain_dir):
+    kern.bootstrap(brainFile=brain_dir)
 else:
-    kern.bootstrap(learnFiles="std-startup.xml", commands="LOAD BRAIN")
-    kern.saveBrain(braindir)
+    kern.bootstrap(learnFiles=startup_dir, commands="LOAD BRAIN")
+    kern.saveBrain(brain_dir)
 
 #######################################################
 # Welcome user
@@ -107,7 +112,7 @@ welcomeMessage = ("Welcome to the Cayman Islands Chat Bot!"
                   "\nAsk me anything about the Cayman islands including"
                   " it's geography, national animals and so on."
                   "\n\n** NEW UPDATE **"
-                  "\n\nMy owner has now trained me on over 60k images of fruits! Upload images in .jpg format to the"
+                  "\nMy owner has now trained me on over 60k images of fruits! Upload images in .jpg format to the"
                   " upload folder and I'll try and predict what it is!")
 print(welcomeMessage)
 #######################################################
@@ -136,11 +141,12 @@ while True:
         elif cmd == 11:
             uploaddir = "data/upload/"
             filetype = ".jpg"
-            img_tensor = preprocess_image(uploaddir + userInput + filetype)
+            file = userInput.split(" ")
+            img_tensor = preprocess_image(uploaddir + file[len(file) - 1] + filetype)
             classes = model.predict_classes(img_tensor)
             for label, num in label_map.items():
                 if num == classes:
-                    print("I think this is a:", label)
+                    print("Uhhh... This looks like a(n) ", label)
 
         elif cmd == 99:
             print("Sorry repeat that please")

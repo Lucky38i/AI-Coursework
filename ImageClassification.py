@@ -6,7 +6,7 @@ from keras.layers import Conv2D, Activation, MaxPooling2D, Dropout, Flatten, Den
 from keras.models import load_model
 from keras_preprocessing.image import ImageDataGenerator
 
-
+# TODO Determine a viable model to produce useful results on unseen data
 def build_model():
     temp_model = Sequential()
 
@@ -59,13 +59,10 @@ if __name__ == '__main__':
     class_num = train_generator.num_classes
     image_shape = test_generator.image_shape
 
-    # TODO Checkpoint doesn't save Metrics, find a way to save it
-
     # Load existing model if it exists otherwise build new model
     if os.path.isfile(checkpoint_file):
         print("Loading existing model")
         model = load_model(checkpoint_file)
-        model.load_weights(checkpoint_file)
         model.summary()
     else:
         print("Creating new model")
