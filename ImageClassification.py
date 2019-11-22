@@ -1,15 +1,14 @@
 import os.path
 
+import kaggle
 from keras import Sequential
-from keras.callbacks import ModelCheckpoint, EarlyStopping
+from keras.callbacks import ModelCheckpoint
 from keras.layers import Conv2D, Activation, MaxPooling2D, Dropout, Flatten, Dense
 from keras.models import load_model
-from keras_preprocessing.image import ImageDataGenerator
-from keras.backend import get_session
-import tensorflow as tf
+from keras.preprocessing import image
+from keras_preprocessing.image import ImageDataGenerator, img_to_array
 
 
-# TODO Determine a viable model to produce useful results on unseen data
 def build_model():
     temp_model = Sequential()
 
@@ -37,7 +36,27 @@ def build_model():
     return temp_model
 
 
+def download_data():
+    kaggle.api.authenticate()
+
+    dataset = 'moltean/fruits'
+    downloaddir = 'data/'
+
+    kaggle.api.dataset_download_files(dataset, path=downloaddir, unzip=True)
+
+
+def preprocess_image(file_dir):
+    temp_img = image.load_img(file_dir, target_size=(100, 100))
+    temp_img = img_to_array(temp_img)
+    temp_img = temp_img.reshape((1,) + temp_img.shape)
+    temp_img = temp_img / 255.
+
+    return temp_img
+
+
 if __name__ == '__main__':
+    # Uncomment if you wish to download the dataset
+    # download_data()
     train_dir = "data/fruits-360_dataset/fruits-360/Training"
     test_dir = "data/fruits-360_dataset/fruits-360/Test"
     checkpoint_file = 'data/models/pani_adam_200_cnn.hdf5'

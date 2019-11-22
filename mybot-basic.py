@@ -2,6 +2,7 @@
 # Imports
 #######################################################
 import io
+import json
 import os
 import string
 import warnings
@@ -9,35 +10,22 @@ import warnings
 import aiml
 import nltk
 from keras.models import load_model
-
-from keras.backend import get_session
-from keras_preprocessing.image import ImageDataGenerator
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import tensorflow as tf
 
-from ImageTest import preprocess_image
-
+from ImageClassification import preprocess_image
 
 # Unsafe
 warnings.filterwarnings("ignore")
 #######################################################
 # Initialise Keras Model
 #######################################################
-test_dir = "data/fruits-360_dataset/fruits-360/Test"
+label_map_file = "data/label_map.json"
 model_dir = "data/models/pani_adam_cnn.hdf5"
-
-test_datagen = ImageDataGenerator(rescale=1 / 255)
-test_generator = test_datagen.flow_from_directory(test_dir, target_size=(100, 100))
-label_map = test_generator.class_indices
+with open(label_map_file, 'r') as file:
+    label_map = json.load(file)
 
 model = load_model(model_dir)
-
-saver = tf.compat.v1.train.Saver()
-sess = get_session()
-saver.restore(sess, 'data/keras_session/session.ckpt')
-
-
 #######################################################
 # Initialise NLTK Agent
 #######################################################
@@ -93,7 +81,6 @@ def response(user_response):
         chatBot_Response += "Sorry, I don't know what that is"
         return chatBot_Response
     else:
-        # TODO parse response to remove the found keyword
         chatBot_Response += "\t" + corpal_sentences[idx].split("\n")[1]
         return chatBot_Response
 
@@ -120,8 +107,8 @@ welcomeMessage = ("Welcome to the Cayman Islands Chat Bot!"
                   "\nAsk me anything about the Cayman islands including"
                   " it's geography, national animals and so on."
                   "\n\n** NEW UPDATE **"
-                  "\nMy owner has now trained me on over 60k images of fruits! Upload images in .jpg format to the"
-                  " upload folder and I'll try and predict what it is!")
+                  "\nMy owner has now trained me on over 60k images of fruits! ask me about"
+                  " the images in the upload folder and I'll try and predict what it is!")
 print(welcomeMessage)
 #######################################################
 # Main loop
@@ -151,10 +138,10 @@ while True:
             filetype = ".jpg"
             file = userInput.split(" ")
             img_tensor = preprocess_image(uploaddir + file[len(file) - 1] + filetype)
-            classes = model.predict_classes(img_tensor, verbose=1)
+            classes = model.predict_classes(img_tensor)
             for label, num in label_map.items():
                 if num == classes:
-                    print("Uhhh... This looks like (a)", label)
+                    print("Uhhh... This looks like a(n)", label)
 
         elif cmd == 99:
             print("Sorry repeat that please")
