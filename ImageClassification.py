@@ -63,6 +63,7 @@ if __name__ == '__main__':
     batch_size = 32
     epochs = 200
 
+    # Image data generator with varying parameters to ensure skewed pictures
     train_datagen = ImageDataGenerator(rotation_range=40,
                                        width_shift_range=0.2,
                                        height_shift_range=0.2,
@@ -91,9 +92,11 @@ if __name__ == '__main__':
     else:
         print("Creating new model")
         model = build_model()
+        # Compile using categorical as we are classifying images, adam optimizer as its most popular
         model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=['accuracy'])
         model.summary()
 
+    # Callbacks to save the best model only
     callbacks = [ModelCheckpoint(filepath=checkpoint_file, verbose=1, save_best_only=True, save_weights_only=False)]
 
     model.fit_generator(train_generator,

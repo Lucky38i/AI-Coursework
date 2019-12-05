@@ -133,6 +133,8 @@ while True:
             print("Let me think..", end="")
             print(response(userInput))
             corpal_sentences.remove(userInput)
+
+        # Manage image classification
         elif cmd == 11:
             uploaddir = "data/upload/"
             filetype = ".jpg"
