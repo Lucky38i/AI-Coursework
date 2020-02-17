@@ -66,6 +66,29 @@ def lem_normalize(text):
 
 
 #######################################################
+#  POL model Interface
+#######################################################
+v = """
+lettuce => {}
+cabbages => {}
+mustards => {}
+potatoes => {}
+onion => {}
+carrots => {}
+beans => {}
+peas => {}
+field1 => {}
+field2 => {}
+field3 => {}
+field4 => {}
+be_in => {}
+"""
+folval = nltk.Valuation.fromstring(v)
+grammar_file = 'data/simple-sem.fcfg'
+objectCounter = 0
+
+
+#######################################################
 #  Similarity-Based Response Generation
 #######################################################
 def response(user_response):
@@ -134,6 +157,57 @@ while True:
             print(response(userInput))
             corpal_sentences.remove(userInput)
 
+        elif cmd == 4:  # I will plant x in y
+            o = 'o' + str(objectCounter)
+            objectCounter += 1
+            folval['o' + o] = o  # insert constant
+            if len(folval[params[1]]) == 1:  # clean up if necessary
+                if ('',) in folval[params[1]]:
+                    folval[params[1]].clear()
+            folval[params[1]].add((o,))  # insert type of plant information if len(folval["be_in"]) == 1: #clean up
+            # if necessary
+            if ('',) in folval["be_in"]:
+                folval["be_in"].clear()
+            folval["be_in"].add((o, folval[params[2]]))  # insert location
+
+        elif cmd == 5:  # Are there any x in y
+            g = nltk.Assignment(folval.domain)
+            m = nltk.Model(folval.domain, folval)
+            sent = 'some ' + params[1] + ' are_in ' + params[2]
+            results = nltk.evaluate_sents([sent], grammar_file, m, g)[0][0]
+            if results[2]:
+                print("Yes.")
+            else:
+                print("No.")
+
+        elif cmd == 6:  # Are all x in y
+            g = nltk.Assignment(folval.domain)
+            m = nltk.Model(folval.domain, folval)
+            sent = 'all ' + params[1] + ' are_in ' + params[2]
+            results = nltk.evaluate_sents([sent], grammar_file, m, g)[0][0]
+            if results[2]:
+                print("Yes.")
+            else:
+                print("No.")
+
+        elif cmd == 7:  # Which plants are in ...
+            g = nltk.Assignment(folval.domain)
+            m = nltk.Model(folval.domain, folval)
+            e = nltk.Expression.fromstring("be_in(x," + params[1] + ")")
+            sat = m.satisfiers(e, "x", g)
+            if len(sat) == 0:
+                print("None.")
+            else:  # find satisfying objects in the valuation dictionary, #and print their type names
+                sol = folval.values()
+                for so in sat:
+                    for k, v in folval.items():
+                        if len(v) > 0:
+                            vl = list(v)
+                            if len(vl[0]) == 1:
+                                for i in vl:
+                                    if i[0] == so:
+                                        print(k)
+                                        break
         # Manage image classification
         elif cmd == 11:
             uploaddir = "data/upload/"
