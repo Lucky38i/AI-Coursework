@@ -84,7 +84,7 @@ field4 => {}
 be_in => {}
 """
 folval = nltk.Valuation.fromstring(v)
-grammar_file = 'data/simple-sem.fcfg'
+grammar_file = 'data/grammars/simple-sem.fcfg'
 objectCounter = 0
 
 
@@ -164,26 +164,17 @@ while True:
             if len(folval[params[1]]) == 1:  # clean up if necessary
                 if ('',) in folval[params[1]]:
                     folval[params[1]].clear()
-            folval[params[1]].add((o,))  # insert type of plant information if len(folval["be_in"]) == 1: #clean up
-            # if necessary
-            if ('',) in folval["be_in"]:
-                folval["be_in"].clear()
+            folval[params[1]].add((o,))  # insert type of plant information
+            if len(folval["be_in"]) == 1:  # clean up if necessary
+                if ('',) in folval["be_in"]:
+                    folval["be_in"].clear()
+            print(o, folval[params[2]])
             folval["be_in"].add((o, folval[params[2]]))  # insert location
 
-        elif cmd == 5:  # Are there any x in y
+        elif cmd == 5 or cmd == 6:  # Are there any x in y or # Are all x in y
             g = nltk.Assignment(folval.domain)
             m = nltk.Model(folval.domain, folval)
             sent = 'some ' + params[1] + ' are_in ' + params[2]
-            results = nltk.evaluate_sents([sent], grammar_file, m, g)[0][0]
-            if results[2]:
-                print("Yes.")
-            else:
-                print("No.")
-
-        elif cmd == 6:  # Are all x in y
-            g = nltk.Assignment(folval.domain)
-            m = nltk.Model(folval.domain, folval)
-            sent = 'all ' + params[1] + ' are_in ' + params[2]
             results = nltk.evaluate_sents([sent], grammar_file, m, g)[0][0]
             if results[2]:
                 print("Yes.")
@@ -197,7 +188,9 @@ while True:
             sat = m.satisfiers(e, "x", g)
             if len(sat) == 0:
                 print("None.")
-            else:  # find satisfying objects in the valuation dictionary, #and print their type names
+            else:
+                # find satisfying objects in the valuation dictionary,
+                # #and print their type names
                 sol = folval.values()
                 for so in sat:
                     for k, v in folval.items():

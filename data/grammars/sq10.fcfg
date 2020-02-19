@@ -1,0 +1,31 @@
+% start S
+############################
+# Grammar Rules
+#############################
+S[SEM=(?np + WHERE + ?vp)] -> NP[SEM=?np] VP[SEM=?vp]
+
+VP[SEM=(?v + ?pp)] -> IV[SEM=?v] PP[SEM=?pp]
+VP[SEM=(?v + ?ap)] -> IV[SEM=?v] AP[SEM=?ap]
+
+
+NP[SEM=(?det + ?n)] -> Det[SEM=?det] N[SEM=?n]
+
+CardN[SEM='1000'] -> '1,000,000'
+
+PP[SEM=(?p + ?np)] -> P[SEM=?p] NP[SEM=?np]
+AP[SEM=?pp] -> A[SEM=?a] PP[SEM=?pp]
+
+#############################
+# Lexical Rules
+#############################
+NP[SEM='Country="greece"'] -> 'Greece'
+NP[SEM='Country="china"'] -> 'China'
+Det[SEM='SELECT'] -> 'Which' | 'What'
+N[SEM='City FROM city_table'] -> 'cities'
+N[SEM='Population'] -> 'populations'
+
+IV[SEM=''] -> 'are'
+TV[SEM=''] -> 'have'
+A[SEM=''] -> 'located'
+P[SEM=''] -> 'in'
+P[SEM='>'] -> 'above'
