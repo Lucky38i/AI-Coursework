@@ -33,6 +33,8 @@ import nltk
 # q = ' '.join(answer)
 # print(q)
 
+nltk.download_gui()
+
 
 read_expr = nltk.sem.Expression.fromstring
 domain = {'b', 'o', 'c'}

@@ -69,22 +69,22 @@ def lem_normalize(text):
 #  POL model Interface
 #######################################################
 v = """
-lettuce => {}
+lettuces => {}
 cabbages => {}
 mustards => {}
 potatoes => {}
-onion => {}
+onions => {}
 carrots => {}
 beans => {}
 peas => {}
-field1 => {}
-field2 => {}
-field3 => {}
-field4 => {}
+field1 => f1
+field2 => f2
+field3 => f3
+field4 => f4
 be_in => {}
 """
 folval = nltk.Valuation.fromstring(v)
-grammar_file = 'data/grammars/simple-sem.fcfg'
+grammar_file = 'simple-sem.fcfg'
 objectCounter = 0
 
 
@@ -162,12 +162,10 @@ while True:
             objectCounter += 1
             folval['o' + o] = o  # insert constant
             if len(folval[params[1]]) == 1:  # clean up if necessary
-                if ('',) in folval[params[1]]:
-                    folval[params[1]].clear()
+                if ('',) in folval[params[1]]: folval[params[1]].clear()
             folval[params[1]].add((o,))  # insert type of plant information
             if len(folval["be_in"]) == 1:  # clean up if necessary
-                if ('',) in folval["be_in"]:
-                    folval["be_in"].clear()
+                if ('',) in folval["be_in"]: folval["be_in"].clear()
             print(o, folval[params[2]])
             folval["be_in"].add((o, folval[params[2]]))  # insert location
 
