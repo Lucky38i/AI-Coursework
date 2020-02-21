@@ -122,17 +122,11 @@ def response(user_response):
 #######################################################
 #  Initialise AIML agent
 #######################################################
-brain_dir = "data/models/brain.brn"
 startup_dir = "data/std-startup.xml"
 
 kern = aiml.Kernel()
 kern.setTextEncoding(None)
-
-if os.path.isfile(brain_dir):
-    kern.bootstrap(brainFile=brain_dir)
-else:
-    kern.bootstrap(learnFiles=startup_dir, commands="LOAD BRAIN")
-    kern.saveBrain(brain_dir)
+kern.bootstrap(learnFiles=startup_dir, commands="LOAD BRAIN")
 
 #######################################################
 # Welcome user
