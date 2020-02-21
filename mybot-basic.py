@@ -69,22 +69,33 @@ def lem_normalize(text):
 #  POL model Interface
 #######################################################
 v = """
-lettuces => {}
-cabbages => {}
-mustards => {}
-potatoes => {}
-onions => {}
-carrots => {}
-beans => {}
-peas => {}
+lettuces => lettuces
+cabbages => cabbages
+mustards => mustards
+potatoes => potatoes
+onions => onions
+carrots => carrots
+beans => beans
+peas => peas
 field1 => f1
 field2 => f2
 field3 => f3
 field4 => f4
 be_in => {}
+George Town => GT
+Bodden Town => BT
+East End => EE
+North Side => NS
+West Bay => WB
+Districts => {GT, WB, BT, EE, NS, WB}
+north_of => {(WB,GT)}
+east_of => {(GT, EE), (GT, BT), (GT, NS), (BT, EE)}
+south_of => {(WB,GT), (NS, BT)}
+west_of => {(EE, NS), (EE, BT), (EE, WB), (EE, GT), (NS, GT), (NS, WB)}
+Capital => {GT}
 """
 folval = nltk.Valuation.fromstring(v)
-grammar_file = 'simple-sem.fcfg'
+grammar_file = 'data/grammars/simple-sem.fcfg'
 objectCounter = 0
 
 
@@ -157,17 +168,15 @@ while True:
             print(response(userInput))
             corpal_sentences.remove(userInput)
 
-        elif cmd == 4:  # I will plant x in y
-            o = 'o' + str(objectCounter)
-            objectCounter += 1
-            folval['o' + o] = o  # insert constant
-            if len(folval[params[1]]) == 1:  # clean up if necessary
-                if ('',) in folval[params[1]]: folval[params[1]].clear()
-            folval[params[1]].add((o,))  # insert type of plant information
-            if len(folval["be_in"]) == 1:  # clean up if necessary
-                if ('',) in folval["be_in"]: folval["be_in"].clear()
-            print(o, folval[params[2]])
-            folval["be_in"].add((o, folval[params[2]]))  # insert location
+        elif cmd == 4:
+            area = ''
+            item = folval.get(params[1])
+            for symbol, value in folval.items():
+                if len(value) > 0:
+                    if symbol == params[2]:
+                        area = value
+                        break
+            folval["be_in"].add((item, area,))
 
         elif cmd == 5 or cmd == 6:  # Are there any x in y or # Are all x in y
             g = nltk.Assignment(folval.domain)
@@ -183,22 +192,29 @@ while True:
             g = nltk.Assignment(folval.domain)
             m = nltk.Model(folval.domain, folval)
             e = nltk.Expression.fromstring("be_in(x," + params[1] + ")")
-            sat = m.satisfiers(e, "x", g)
-            if len(sat) == 0:
-                print("None.")
+            results = m.satisfiers(e, "x", g)
+            if len(results) == 0:
+                print("There are none, sorry!")
             else:
-                # find satisfying objects in the valuation dictionary,
-                # #and print their type names
                 sol = folval.values()
-                for so in sat:
-                    for k, v in folval.items():
-                        if len(v) > 0:
-                            vl = list(v)
-                            if len(vl[0]) == 1:
-                                for i in vl:
-                                    if i[0] == so:
-                                        print(k)
-                                        break
+                for result in results:
+                    for symbol, value in folval.items():
+                        if len(value) > 0:
+                            if value == result:
+                                print(symbol)
+                                break
+        elif cmd == 8:  # All districts in cayman
+            grammar = nltk.Assignment(folval.domain)
+            model = nltk.Model(folval.domain, folval)
+            expression = nltk.Expression.fromstring("Districts(x)")
+            results = model.satisfiers(expression, "x", grammar)
+            sol = folval.values()
+            for result in results:
+                for symbol, value in folval.items():
+                    if len(value) > 0:
+                        if value == result:
+                            print(symbol)
+                            break
         # Manage image classification
         elif cmd == 11:
             uploaddir = "data/upload/"
