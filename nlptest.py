@@ -33,43 +33,70 @@ import nltk
 # q = ' '.join(answer)
 # print(q)
 
-nltk.download_gui()
+# nltk.download_gui()
 
 
-read_expr = nltk.sem.Expression.fromstring
-domain = {'b', 'o', 'c'}
 v = """
-bertie => b
-olive => o
-cyril => c
-boy => {b}
-girl => {o}
-dog => {c}
-walk => {o, c}
-see => {(b, o), (c, b), (o, c)}
+George Town => GT
+Bodden Town => BT
+East End => EE
+North Side => NS
+West Bay => WB
+districts => {GT, WB, BT, EE, NS, WB}
+south_of => {(WB,GT), (NS, BT)}
+west_of => {(EE, NS), (EE, BT), (EE, WB), (EE, GT), (NS, GT), (NS, WB)}
 """
-val = nltk.Valuation.fromstring(v)
-# print(val)
+read_expr = nltk.Expression.fromstring
+prover = nltk.Prover9()
 
-g = nltk.Assignment(domain, [('x', 'o'), ('y', 'c')])
-# print(g)
+valuation = nltk.Valuation.fromstring(v)
+domain = valuation.domain
+model = nltk.Model(domain, valuation)
+grammar = nltk.Assignment(domain)
+cp = nltk.load_parser('data/grammars/sq10.fcfg',trace=3)
 
-model = nltk.Model(domain, val)
+north_assum = read_expr('all x. all y. (north_of(x, y) -> -north_of(y, x))')
+north_a1 = read_expr('north_of(GT, WB)')
 
-fmla1 = read_expr('girl(x) | boy(x)')
-fmla2 = read_expr('girl(x) -> walk(x)')
-fmla3 = read_expr('walk(x) -> girl(x)')
+east_assum = read_expr('all x. all y. (east_of(x, y) -> -east_of(y, x))')
+east_a1 = read_expr('east_of(GT,EE)')
+east_a2 = read_expr('east_of(GT, BT)')
+east_a3 = read_expr('east_of(GT, NS)')
+east_a4 = read_expr('east_of(BT, EE)')
 
-v2 = """
-bruce => b
-elspeth => e
-julia => j
-matthew => m
-person => {b, e, j, m}
-admire => {(b,e), (m, j)}
-"""
-val2 = nltk.Valuation.fromstring(v2)
-domain2 = val2.domain
-model2 = nltk.Model(domain2, val2)
-g2 = nltk.Assignment(domain2)
+west_assum = read_expr('all x. all y. (west_of(x, y) -> -west_of(y, x))')
+west_a1 = read_expr('west_of(EE, NS)')
+west_a2 = read_expr('west_of(EE, BT)')
+west_a3 = read_expr('west_of(EE, WB)')
+west_a4 = read_expr('west_of(EE, GT)')
+west_a5 = read_expr('west_of(NS, GT)')
+west_a6 = read_expr('west_of(NS, WB)')
+
+south_assum = read_expr('all x. all y. (south_of(x, y) -> -south_of(y, x))')
+south_a1 = read_expr('south_of(WB,GT)')
+south_a2 = read_expr('south_of(NS, BT)')
+
+assumptions = [east_assum, east_a1, east_a2, east_a3, east_a4,
+               north_assum, north_a1,
+               west_assum, west_a1, west_a2, west_a3, west_a4, west_a5, west_a6,
+               south_assum, south_a1, south_a2]
+
+sent = read_expr('north_of(EE,GT)')
+# print(prover.prove(sent, assumptions))
+
+query = 'which city is north of west bay'
+
+
+
+
+
+
+
+
+# trees = list(cp.parse(query.split()))
+# answer = trees[0].label()['SEM']
+# answer = [s for s in answer if s]
+# q = ' '.join(answer)
+# print(q)
+
 

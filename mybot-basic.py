@@ -68,34 +68,32 @@ def lem_normalize(text):
 #######################################################
 #  POL model Interface
 #######################################################
-v = """
-lettuces => lettuces
-cabbages => cabbages
-mustards => mustards
-potatoes => potatoes
-onions => onions
-carrots => carrots
-beans => beans
-peas => peas
-field1 => f1
-field2 => f2
-field3 => f3
-field4 => f4
-be_in => {}
+val = """
+avocado => {}
+mango => {}
+bananas => {}
+breadfruit => {}
+starfruit => {}
+guinep => {}
+ackee => {}
+limes => {}
+coconut => {}
+tamarind => {}
+farm => f1 
+backyard => b1
+farm2 => f2
+be_in => {} 
 George Town => GT
 Bodden Town => BT
 East End => EE
 North Side => NS
 West Bay => WB
-Districts => {GT, WB, BT, EE, NS, WB}
-north_of => {(WB,GT)}
-east_of => {(GT, EE), (GT, BT), (GT, NS), (BT, EE)}
+districts => {GT, WB, BT, EE, NS, WB}
 south_of => {(WB,GT), (NS, BT)}
 west_of => {(EE, NS), (EE, BT), (EE, WB), (EE, GT), (NS, GT), (NS, WB)}
-Capital => {GT}
 """
-folval = nltk.Valuation.fromstring(v)
-grammar_file = 'data/grammars/simple-sem.fcfg'
+folval = nltk.Valuation.fromstring(val)
+grammar_file = 'data/grammars/CIGrammarFile.fcfg'
 objectCounter = 0
 
 
@@ -135,8 +133,9 @@ welcomeMessage = ("Welcome to the Cayman Islands Chat Bot!"
                   "\nAsk me anything about the Cayman islands including"
                   " it's geography, national animals and so on."
                   "\n\n** NEW UPDATE **"
-                  "\nMy owner has now trained me on over 60k images of fruits! ask me about"
-                  " the images in the upload folder and I'll try and predict what it is!")
+                  "\nMy owner has implemented semantic tagging ask me about"
+                  " the districts in cayman or try planting some fruits grown in cayman in either the farm or backyard!"
+                  "\nAsk me where each fruit is grown and if there's any fruits in a specific place")
 print(welcomeMessage)
 #######################################################
 # Main loop
@@ -163,44 +162,64 @@ while True:
             corpal_sentences.remove(userInput)
 
         elif cmd == 4:
-            area = ''
-            item = folval.get(params[1])
-            for symbol, value in folval.items():
-                if len(value) > 0:
-                    if symbol == params[2]:
-                        area = value
-                        break
-            folval["be_in"].add((item, area,))
+            o = 'o' + str(objectCounter)
+            objectCounter += 1
+            folval['o' + o] = o  # insert constant
+            try:
+                if len(folval[params[1]]) == 1:  # clean up if necessary
+                    if ('',) in folval[params[1]]:
+                        folval[params[1]].clear()
+                folval[params[1]].add((o,))  # insert type of plant information
+                if len(folval["be_in"]) == 1:  # clean up if necessary
+                    if ('',) in folval["be_in"]:
+                        folval["be_in"].clear()
+                folval["be_in"].add((o, folval[params[2]]))  # insert location
+            except nltk.sem.evaluate.Undefined:
+                print("Those are invalid objects, try again")
 
         elif cmd == 5 or cmd == 6:  # Are there any x in y or # Are all x in y
-            g = nltk.Assignment(folval.domain)
-            m = nltk.Model(folval.domain, folval)
-            sent = 'some ' + params[1] + ' are_in ' + params[2]
-            results = nltk.evaluate_sents([sent], grammar_file, m, g)[0][0]
-            if results[2]:
-                print("Yes.")
-            else:
-                print("No.")
+            try:
+                g = nltk.Assignment(folval.domain)
+                m = nltk.Model(folval.domain, folval)
+                allOrSome = 'some '
+                if cmd == 6:
+                    allOrSome = 'all '
+                sent = allOrSome + params[1] + ' are_in ' + params[2]
+                results = nltk.evaluate_sents([sent], grammar_file, m, g)[0][0]
+                if results[2]:
+                    print("Yes.")
+                else:
+                    print("No.")
+            except ValueError:
+                print("Those are invalid objects, try checking for something else")
 
         elif cmd == 7:  # Which plants are in ...
-            g = nltk.Assignment(folval.domain)
-            m = nltk.Model(folval.domain, folval)
-            e = nltk.Expression.fromstring("be_in(x," + params[1] + ")")
-            results = m.satisfiers(e, "x", g)
-            if len(results) == 0:
-                print("There are none, sorry!")
-            else:
-                sol = folval.values()
-                for result in results:
-                    for symbol, value in folval.items():
-                        if len(value) > 0:
-                            if value == result:
-                                print(symbol)
-                                break
+            try:
+                g = nltk.Assignment(folval.domain)
+                m = nltk.Model(folval.domain, folval)
+                e = nltk.Expression.fromstring("be_in(x," + params[1] + ")")
+                results = m.satisfiers(e, "x", g)
+                if len(results) == 0:
+                    print("There are none, sorry!")
+                else:
+                    # find satisfying objects in the valuation dictionary,
+                    # #and print their type names
+                    sol = folval.values()
+                    for so in results:
+                        for symbol, value in folval.items():
+                            if len(value) > 0:
+                                valList = list(value)
+                                if len(valList[0]) == 1:
+                                    for i in valList:
+                                        if i[0] == so:
+                                            print(symbol)
+                                            break
+            except nltk.sem.evaluate.Undefined:
+                print("That's not a valid place, try again")
         elif cmd == 8:  # All districts in cayman
             grammar = nltk.Assignment(folval.domain)
             model = nltk.Model(folval.domain, folval)
-            expression = nltk.Expression.fromstring("Districts(x)")
+            expression = nltk.Expression.fromstring("districts(x)")
             results = model.satisfiers(expression, "x", grammar)
             sol = folval.values()
             for result in results:
