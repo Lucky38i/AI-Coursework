@@ -169,7 +169,7 @@ while True:
                 if len(folval[params[1]]) == 1:  # clean up if necessary
                     if ('',) in folval[params[1]]:
                         folval[params[1]].clear()
-                folval[params[1]].add((o,))  # insert type of plant information
+                folval[params[1]].add((o,))  # insert type of fruit information
                 if len(folval["be_in"]) == 1:  # clean up if necessary
                     if ('',) in folval["be_in"]:
                         folval["be_in"].clear()
@@ -193,7 +193,7 @@ while True:
             except ValueError:
                 print("Those are invalid objects, try checking for something else")
 
-        elif cmd == 7:  # Which plants are in ...
+        elif cmd == 7:  # Which fruits are in ...
             try:
                 g = nltk.Assignment(folval.domain)
                 m = nltk.Model(folval.domain, folval)

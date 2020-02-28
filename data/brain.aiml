@@ -173,6 +173,7 @@
     <pattern> I WILL PLANT * IN * </pattern>
     <template>#4$<star index="1"/>$<star index="2"/></template>
 </category>
+
 <category>
     <pattern> I WILL PLANT * IN THE * </pattern>
     <template><srai> I WILL PLANT <star index="1"/> IN <star index="2"/></srai></template>
