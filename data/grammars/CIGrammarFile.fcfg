@@ -1,13 +1,13 @@
 ## Natural Language Toolkit: sem3.fcfg
 ##
-## Alternative simple grammar with transitive verbs and
-## quantifiers for the book.
-##
-## Author: Ewan Klein <ewan@inf.ed.ac.uk>
+## Alternative simple grammar with transitive verbs and 
+## quantifiers for the book. 
+## 
+## Author: Ewan Klein <ewan@inf.ed.ac.uk> 
 ## URL: <http://nltk.sourceforge.net>
 ## For license information, see LICENSE.TXT
 
-## modified by Alex McBean, Nottingham Trent University
+## modified by Alex MCBean, Nottingham Trent University
 
 % start S
 ############################
@@ -31,29 +31,29 @@ PP[+TO, SEM=?np] -> P[+TO] NP[SEM=?np]
 # Lexical Rules
 #############################
 
-PropN[-LOC,NUM=sg,SEM=<\P.P(field1)>] -> 'field1'
-PropN[-LOC,NUM=sg,SEM=<\P.P(field2)>] -> 'field2'
-PropN[-LOC,NUM=sg,SEM=<\P.P(field3)>] -> 'field3'
-PropN[-LOC,NUM=sg,SEM=<\P.P(field4)>] -> 'field4'
+PropN[-LOC,NUM=sg,SEM=<\P.P(farm)>] -> 'farm'
+PropN[-LOC,NUM=sg,SEM=<\P.P(backyard)>] -> 'backyard'
+PropN[-LOC,NUM=sg,SEM=<\P.P(farm2)>] -> 'farm2'
 
 Det[NUM=sg,SEM=<\P Q.all x.(P(x) -> Q(x))>] -> 'every'
 Det[NUM=pl,SEM=<\P Q.all x.(P(x) -> Q(x))>] -> 'all'
 Det[SEM=<\P Q.exists x.(P(x) & Q(x))>] -> 'some'
 Det[NUM=sg,SEM=<\P Q.exists x.(P(x) & Q(x))>] -> 'a'
 Det[NUM=sg,SEM=<\P Q.exists x.(P(x) & Q(x))>] -> 'an'
+Det[SEM=<\P Q.exists x.(P(x) & Q(x))>] -> 'is'
 
-N[NUM=pl,SEM=<\x.lettuces(x)>] -> 'lettuces'
-N[NUM=pl,SEM=<\x.cabbages(x)>] -> 'cabbages'
-N[NUM=pl,SEM=<\x.mustards(x)>] -> 'mustards'
-N[NUM=pl,SEM=<\x.potatoes(x)>] -> 'potatoes'
-N[NUM=pl,SEM=<\x.onions(x)>] -> 'onions'
-N[NUM=pl,SEM=<\x.carrots(x)>] -> 'carrots'
-N[NUM=pl,SEM=<\x.george_town(x)>] -> 'george_town'
+N[NUM=pl,SEM=<\x.avocado(x)>] -> 'avocado'
+N[NUM=pl,SEM=<\x.mango(x)>] -> 'mango'
+N[NUM=pl,SEM=<\x.bananas(x)>] -> 'bananas'
+N[NUM=pl,SEM=<\x.breadfruit(x)>] -> 'breadfruit'
+N[NUM=pl,SEM=<\x.starfruit(x)>] -> 'starfruit'
+N[NUM=pl,SEM=<\x.guinep(x)>] -> 'guinep'
+N[NUM=pl,SEM=<\x.ackee(x)>] -> 'ackee'
+N[NUM=pl,SEM=<\x.limes(x)>] -> 'limes'
+N[NUM=pl,SEM=<\x.coconut(x)>] -> 'coconut'
+N[NUM=pl,SEM=<\x.tamarind(x)>] -> 'tamarind'
 
 TV[NUM=sg,SEM=<\X x.X(\y.be_in(x,y))>,TNS=pres] -> 'is_in'
 TV[NUM=pl,SEM=<\X x.X(\y.be_in(x,y))>,TNS=pres] -> 'are_in'
-TV[NUM=sg,SEM=<\X x.X(\y.name(x,y))>,TNS=pres] -> is
-DTV[NUM=sg,SEM=<\Y X x.X(\z.Y(\y.give(x,y,z)))>,TNS=pres] -> 'gives'
-DTV[NUM=pl,SEM=<\Y X x.X(\z.Y(\y.give(x,y,z)))>,TNS=pres] -> 'give'
 
 P[+to] -> 'to'

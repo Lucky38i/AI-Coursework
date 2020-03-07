@@ -2,30 +2,45 @@
 ############################
 # Grammar Rules
 #############################
-S[SEM=(?np + WHERE + ?vp)] -> NP[SEM=?np] VP[SEM=?vp]
+S[SEM=(?ap + '(' + ?vp + ')')] -> AP[SEM=?ap] NP[SEM=?np]
 
-VP[SEM=(?v + ?pp)] -> IV[SEM=?v] PP[SEM=?pp]
-VP[SEM=(?v + ?ap)] -> IV[SEM=?v] AP[SEM=?ap]
+AP[SEM=(?n + ?in)] -> N[SEM='?n'] IN[SEM=?in]
 
+NP[SEM=(?vp + ',' + '?pp')] -> VP[SEM=?vp] PP[SEM=?pp]
 
-NP[SEM=(?det + ?n)] -> Det[SEM=?det] N[SEM=?n]
-
-CardN[SEM='1000'] -> '1,000,000'
-
-PP[SEM=(?p + ?np)] -> P[SEM=?p] NP[SEM=?np]
-AP[SEM=?pp] -> A[SEM=?a] PP[SEM=?pp]
+VP[SEM=(?propn + ?n)] -> PropN[SEM=?propn] N[SEM=?n]
+PP[SEM=(?n1 + ?n2)] -> N[SEM=?n1] N[SEM=?n2]
 
 #############################
 # Lexical Rules
 #############################
-NP[SEM='Country="greece"'] -> 'Greece'
-NP[SEM='Country="china"'] -> 'China'
-Det[SEM='SELECT'] -> 'Which' | 'What'
-N[SEM='City FROM city_table'] -> 'cities'
-N[SEM='Population'] -> 'populations'
 
-IV[SEM=''] -> 'are'
-TV[SEM=''] -> 'have'
-A[SEM=''] -> 'located'
-P[SEM=''] -> 'in'
-P[SEM='>'] -> 'above'
+DET[SEM=(?n+ _ + ?tv)] -> N[SEM=?n] TV[SEM=?tv]
+DET[SEM=(?n+ _ + ?tv)] -> N[SEM=?n] TV[SEM=?tv]
+DET[SEM=(?n+ _ + ?tv)] -> N[SEM=?n] TV[SEM=?tv]
+DET[SEM=(?n+ _ + ?tv)] -> N[SEM=?n] TV[SEM=?tv]
+DET[SEM='W'] -> 'West'
+DET[SEM='G'] -> 'George'
+DET[SEM='B'] -> 'Bodden'
+DET[SEM='E'] -> 'East'
+DET[SEM='N'] -> 'North'
+
+PropN[SEM='W'] -> 'West'
+PropN[SEM='G'] -> 'George'
+PropN[SEM='B'] -> 'Bodden'
+PropN[SEM='E'] -> 'East'
+PropN[SEM='N'] -> 'North'
+
+
+N[SEM='G'] -> 'George'
+N[SEM='B'] -> 'bay'
+N[SEM='T'] -> 'town'
+N[SEM='S'] -> 'side'
+N[SEM='N'] -> 'north'
+N[SEM='W'] -> 'west'
+N[SEM='E'] -> 'east'
+N[SEM='S'] -> 'south'
+N[SEM='E'] -> 'end'
+
+IN[SEM='_of'] -> 'of'
+TV[SEM=''] -> 'is'

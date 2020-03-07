@@ -165,8 +165,18 @@
 </category>
 
 <category>
+    <pattern> WHICH DISTRICTS ARE IN CAYMAN </pattern>
+    <template><srai> WHAT ARE THE DISTRICTS </srai></template>
+</category>
+
+<category>
     <pattern> I WILL PLANT * IN * </pattern>
     <template>#4$<star index="1"/>$<star index="2"/></template>
+</category>
+
+<category>
+    <pattern> I WILL PLANT * IN THE * </pattern>
+    <template><srai> I WILL PLANT <star index="1"/> IN <star index="2"/></srai></template>
 </category>
 
 <category>
@@ -175,13 +185,23 @@
 </category>
 
 <category>
+    <pattern>ARE THERE ANY * IN THE *</pattern>
+    <template><srai>ARE THERE ANY <star index="1"/> IN <star index="2"/></srai></template>
+</category>
+
+<category>
     <pattern> ARE ALL * IN * </pattern>
     <template>#6$<star index="1"/>$<star index="2"/></template>
 </category>
 
 <category>
-    <pattern> WHICH PLANTS ARE IN * </pattern>
+    <pattern> WHICH FRUITS ARE IN * </pattern>
     <template>#7$<star index="1"/></template>
+</category>
+
+<category>
+    <pattern> WHICH FRUITS ARE IN THE * </pattern>
+    <template><srai> WHICH PLANTS ARE IN <star index="1"/></srai></template>
 </category>
     <!-- Default Response -->
 <category>
