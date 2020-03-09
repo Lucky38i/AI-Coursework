@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Setup Parameters
-BATCH_SIZE = 64
+BATCH_SIZE = 32
 BUFFER_SIZE = 20000
 MAX_SAMPLES = 50000
 MAX_LENGTH = 40
@@ -22,7 +22,7 @@ D_MODEL = 256
 NUM_HEADS = 8
 UNITS = 512
 DROPOUT = 0.1
-EPOCHS= 30
+EPOCHS = 30
 
 # File Locations
 TRAIN_FILE = "data/squad/train-v2.0.json"
@@ -409,6 +409,14 @@ questions, answers = load_conversation(read_data)
 # Build tokenizer using tfds for both questions and answers
 tokenizer = tfds.features.text.SubwordTextEncoder.build_from_corpus(
     questions + answers, target_vocab_size=2 ** 13)
+sample_string = 'Transformer is awesome.'
+
+tokenized_string = tokenizer.encode(sample_string)
+print('Tokenized string is {}'.format(tokenized_string))
+
+original_string = tokenizer.decode(tokenized_string)
+print('The original string: {}'.format(original_string))
+
 
 # Define start and end token to indicate the start and end of a sentence
 START_TOKEN, END_TOKEN = [tokenizer.vocab_size], [tokenizer.vocab_size + 1]
@@ -449,6 +457,7 @@ learning_rate = CustomSchedule(D_MODEL)
 
 optimizer = tf.keras.optimizers.Adam(learning_rate, beta_1=0.9, beta_2=0.98, epsilon=1e-9)
 model.compile(optimizer=optimizer, loss=loss_function, metrics=[accuracy])
-callbacks = [ModelCheckpoint(filepath=CHECKPOINT_FILE, verbose=1, save_best_only=True, save_weights_only=False)]
+model.summary()
+callbacks = [ModelCheckpoint(filepath=CHECKPOINT_FILE, verbose=1, save_best_only=True, save_weights_only=True)]
 
 model.fit(dataset, epochs=EPOCHS, verbose=1, callbacks=callbacks)
