@@ -13,7 +13,7 @@ from keras.models import load_model
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-from ImageClassification import preprocess_image
+from ImageClassification_Training import preprocess_image
 
 # Unsafe
 warnings.filterwarnings("ignore")
