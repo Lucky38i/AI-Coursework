@@ -116,7 +116,7 @@ class CommonEmbedding(tf.keras.Model):
         pes = np.concatenate(pes, axis=0)
         self.pes = tf.constant(pes, dtype=tf.float32)
         self.embedding = tf.keras.layers.Embedding(vocab_size, model_size)
-        self.embedding_dropout = tf.keras.layers.Dropout(0.1)
+        self.embedding_dropout = tf.keras.layers.Dropout(0.3)
         self.model_size = model_size
 
     def call(self, sequence):
@@ -250,7 +250,7 @@ class Encoder(tf.keras.Model):
         self.attention = [MultiHeadAttention(
             model_size, h) for _ in range(num_layers)]
         self.attention_dropout = [
-            tf.keras.layers.Dropout(0.1) for _ in range(num_layers)]
+            tf.keras.layers.Dropout(0.3) for _ in range(num_layers)]
 
         self.attention_norm = [tf.keras.layers.LayerNormalization(
             epsilon=1e-6) for _ in range(num_layers)]
@@ -260,7 +260,7 @@ class Encoder(tf.keras.Model):
         self.dense_2 = [tf.keras.layers.Dense(
             model_size) for _ in range(num_layers)]
         self.ffn_dropout = [tf.keras.layers.Dropout(
-            0.1) for _ in range(num_layers)]
+            0.3) for _ in range(num_layers)]
         self.ffn_norm = [tf.keras.layers.LayerNormalization(
             epsilon=1e-6) for _ in range(num_layers)]
 
@@ -338,13 +338,13 @@ class Decoder(tf.keras.Model):
         self.attention_bot = [MultiHeadAttention(
             model_size, h) for _ in range(num_layers)]
         self.attention_bot_dropout = [
-            tf.keras.layers.Dropout(0.1) for _ in range(num_layers)]
+            tf.keras.layers.Dropout(0.3) for _ in range(num_layers)]
         self.attention_bot_norm = [tf.keras.layers.LayerNormalization(
             epsilon=1e-6) for _ in range(num_layers)]
         self.attention_mid = [MultiHeadAttention(
             model_size, h) for _ in range(num_layers)]
         self.attention_mid_dropout = [
-            tf.keras.layers.Dropout(0.1) for _ in range(num_layers)]
+            tf.keras.layers.Dropout(0.3) for _ in range(num_layers)]
         self.attention_mid_norm = [tf.keras.layers.LayerNormalization(
             epsilon=1e-6) for _ in range(num_layers)]
 
@@ -426,7 +426,7 @@ class Decoder(tf.keras.Model):
         return logits, bot_alignments, mid_alignments
 
 
-"""## Transformer Model Creation"""
+'''## Transformer Model Creation'''
 
 
 def create_transformer(vocab_size, model_size, max_length, num_layers, h):
@@ -479,5 +479,5 @@ def predict(encoder, decoder, tokenizer, raw_input_lines, max_length):
         if out_words[-1] == '<end>' or len(out_words) >= max_length:
             break
 
-    print('Bot: ' + ' '.join(out_words))
+    print(' '.join(out_words[:-1]))
     return en_alignments, de_bot_alignments, de_mid_alignments, test_source_text.split(' '), out_words

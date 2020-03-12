@@ -101,8 +101,7 @@ def create_dataset(batch_size):
 
     """## TF Dataset Creation"""
 
-    dataset = tf.data.Dataset.from_tensor_slices(
-        (data_ques, data_ans_in, data_ans_in))
+    dataset = tf.data.Dataset.from_tensor_slices((data_ques, data_ans_in, data_ans_out))
     dataset = dataset.shuffle(len(data_ques)).batch(batch_size)
 
     """## Create the Positional Embedding"""

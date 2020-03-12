@@ -1,3 +1,15 @@
+"""
+This is a Transformer Model developed using multiple sources listed below:
+https://machinetalk.org/2019/04/29/create-the-transformer-with-tensorflow-2-0/
+https://www.tensorflow.org/tutorials/text/transformer
+
+Credit goes towards Trung Tran at MachineTalk for explaining Multi-Head Attention and the semantics behind
+a Transformer Model. Several altercations have been made to his code to preprocess the dataset being used
+Minor changes have been made to the Hyper-Parameters as-well as configurations in the Model's layers including
+Dropout to prevent over-fitting on this dataset.
+
+Alex McBean N0696066
+"""
 import glob
 import os
 import time
