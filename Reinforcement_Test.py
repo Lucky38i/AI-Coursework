@@ -40,10 +40,12 @@ class QLearningAgent:
 env = gym.make('FrozenLake-v0')
 ql = QLearningAgent()
 wins = 0
+
 for i_episode in range(episodes):
     state = env.reset()
     for t in range(200):
         newState, reward, done, info = env.step(ql.action(state))
+        env.render()
         ql.reward(state, reward, newState)
         state = newState
         if done:
