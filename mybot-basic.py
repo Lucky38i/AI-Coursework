@@ -13,7 +13,8 @@ from keras.models import load_model
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-from ImageClassification import preprocess_image
+from ImageClassification_Training import preprocess_image
+import Transformer_Training as tt
 
 # Unsafe
 warnings.filterwarnings("ignore")
@@ -64,6 +65,20 @@ for punctuation in string.punctuation:
 def lem_normalize(text):
     return lem_tokens(nltk.word_tokenize(text.lower().translate(remove_punct_dict)))
 
+
+#######################################################
+#  Transformer Model Interface
+#######################################################
+encoder_path = "data/checkpoints/encoder_epoch_68.h5"
+decoder_path = "data/checkpoints/decoder_epoch_68.h5"
+
+dataset, info = tt.create_dataset(tt.BATCH_SIZE)
+encoder, decoder = tt.create_transformer(info['vocab_size'], tt.MODEL_SIZE,
+                                         info['max_length'], tt.NUM_LAYERS, tt.ATTENTION_HEADS)
+encoder.load_weights(encoder_path)
+decoder.load_weights(decoder_path)
+
+print(info)
 
 #######################################################
 #  POL model Interface
@@ -133,9 +148,8 @@ welcomeMessage = ("Welcome to the Cayman Islands Chat Bot!"
                   "\nAsk me anything about the Cayman islands including"
                   " it's geography, national animals and so on."
                   "\n\n** NEW UPDATE **"
-                  "\nMy owner has implemented semantic tagging ask me about"
-                  " the districts in cayman or try planting some fruits grown in cayman in either the farm or backyard!"
-                  "\nAsk me where each fruit is grown and if there's any fruits in a specific place")
+                  "\nMy owner has implemented a Transformer Model to train me on the SQuAD"
+                  "\nDataset!, refer to their explore page for questions you can ask me.")
 print(welcomeMessage)
 #######################################################
 # Main loop
@@ -240,6 +254,7 @@ while True:
                     print("Uhhh... This looks like a(n)", label)
 
         elif cmd == 99:
-            print("Sorry repeat that please")
+            input_sentence = [userInput]
+            tt.predict(encoder, decoder, info['tokenizer'], input_sentence, info['max_length'])
     else:
         print(answer)

@@ -1,7 +1,7 @@
 from keras.models import load_model
 from keras_preprocessing.image import ImageDataGenerator
 
-from ImageClassification import preprocess_image
+from ImageClassification_Training import preprocess_image
 
 if __name__ == '__main__':
     test_dir = "data/fruits-360_dataset/fruits-360/Test"
