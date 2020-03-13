@@ -175,3 +175,11 @@ venv.bak/
 # mypy
 .mypy_cache/
 /data/fruits-360_dataset
+
+# vscode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
