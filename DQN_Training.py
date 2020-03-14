@@ -1,32 +1,53 @@
-from DQN_Agent import Agent
+from DQN_Agent_Images import Agent, stack_frames
 import numpy as np
 import gym
 import tensorflow as tf
 import os
+from collections import deque
 
-model_file = "data/models/dqn_MountainCar_model.h5"
+# File Location
+model_file = "data/models/dqn_Breakout_model.h5"
+
+# Model Hyperparameters
+state_size = [179, 144, 4]
+
+# Preprocessing Hyperparamters
+stack_size = 4
+
+# Training Hyperparameters
+lr = 0.0001
+n_games = 500
+gamma = 0.98
+epsilon = 0.99
+decay = 1e-3
+epsilon_end = 0.01
+batch_size = 128
+
 
 if __name__ == '__main__':
     tf.compat.v1.disable_eager_execution()
-    env = gym.make('MountainCar-v0')
-    lr = 0.0001
-    n_games = 500
-    agent = Agent(gamma=0.98, epsilon=0.01, lr=lr, input_dims=env.observation_space.shape,
-                  n_actions=env.action_space.n, mem_size=1000000, batch_size=128, epsilon_end=0.01,
-                  model_file=model_file, epsilon_dec=1e-3)
+    env = gym.make('Breakout-v0')
+    stacked_frames = deque([np.zeros((179, 144), dtype=np.int) for i in range(4)], maxlen=4)
+    agent = Agent(gamma=gamma, epsilon=epsilon, lr=lr, input_dims=state_size,
+                  n_actions=env.action_space.n, mem_size=1000000, batch_size=batch_size, epsilon_end=epsilon_end,
+                  model_file=model_file, epsilon_dec=decay)
+
     if os.path.isfile(model_file):
         print("Loading existing Model")
         agent.load_model()
+
     scores = []
     eps_history = []
     for i in range(n_games):
         done = False
         score = 0
         observation = env.reset()
+        observation, stacked_frame = stack_frames(stacked_frames, observation, True)
         while not done:
             # env.render()
             action = agent.choose_action(observation)
             next_observation, reward, done, info = env.step(action)
+            next_observation, stacked_frame = stack_frames(stacked_frames, next_observation, False)
             score += reward
             agent.store_transition(observation, action, reward, next_observation, done)
             observation = next_observation
