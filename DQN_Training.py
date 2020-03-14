@@ -6,7 +6,7 @@ import os
 from collections import deque
 
 # File Location
-model_file = "data/models/dqn_Breakout_model.h5"
+model_file = "data/models/dqn_Breakout_Modified_model.h5"
 
 # Model Hyperparameters
 state_size = [179, 144, 4]
@@ -15,13 +15,13 @@ state_size = [179, 144, 4]
 stack_size = 4
 
 # Training Hyperparameters
-lr = 0.0001
+lr = 0.00001
 n_games = 500
-gamma = 0.98
-epsilon = 0.99
-decay = 1e-3
+gamma = 0.99
+epsilon = 1
+decay = 1e-5
 epsilon_end = 0.01
-batch_size = 128
+batch_size = 64
 
 
 if __name__ == '__main__':
@@ -29,7 +29,7 @@ if __name__ == '__main__':
     env = gym.make('Breakout-v0')
     stacked_frames = deque([np.zeros((179, 144), dtype=np.int) for i in range(4)], maxlen=4)
     agent = Agent(gamma=gamma, epsilon=epsilon, lr=lr, input_dims=state_size,
-                  n_actions=env.action_space.n, mem_size=1000000, batch_size=batch_size, epsilon_end=epsilon_end,
+                  n_actions=env.action_space.n, mem_size=1000, batch_size=batch_size, epsilon_end=epsilon_end,
                   model_file=model_file, epsilon_dec=decay)
 
     if os.path.isfile(model_file):
@@ -45,6 +45,8 @@ if __name__ == '__main__':
         observation, stacked_frame = stack_frames(stacked_frames, observation, True)
         while not done:
             # env.render()
+            # Training developed from https://www.youtube.com/watch?v=SMZfgeHFFcA
+            # with modifications to for frame stacking
             action = agent.choose_action(observation)
             next_observation, reward, done, info = env.step(action)
             next_observation, stacked_frame = stack_frames(stacked_frames, next_observation, False)
@@ -59,4 +61,6 @@ if __name__ == '__main__':
         print('episode: ', i, 'score %.2f' % score,
               'average_score %.2f' % avg_score,
               'epsilon %.2f' % agent.epsilon)
-    agent.save_model()
+
+        if i == 50:    # Saves after 50 episodes
+            agent.save_model()

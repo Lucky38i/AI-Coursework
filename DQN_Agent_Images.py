@@ -3,14 +3,18 @@ from collections import deque
 import numpy as np
 from skimage import transform
 from skimage.color import rgb2gray
-from tensorflow.keras.initializers import GlorotNormal
-from tensorflow.keras.layers import Dense, Conv2D, Flatten
+from tensorflow.keras.initializers import VarianceScaling
+from tensorflow.keras.layers import Dense, Conv2D, Flatten, MaxPooling2D
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.models import load_model
 from tensorflow.keras.optimizers import Adam
 
 
 class ReplayBuffer:
+    """
+    Memory Buffer used from: https://www.youtube.com/watch?v=SMZfgeHFFcA
+    No Modifications were made to this code.
+    """
     def __init__(self, mem_size, input_dims):
         self.mem_size = mem_size
         self.mem_center = 0
@@ -45,15 +49,23 @@ class ReplayBuffer:
 
 
 def build_dqn(lr, n_actions, input_size):
+    """
+    Model framework used from: https://www.youtube.com/watch?v=SMZfgeHFFcA,
+    however it was modified to interpret images from the Atari emulator. valid padding was used
+    as the inputs could  be reduced as needed rather than using same. Fully-connected layers was applied
+    as usual after the CNNs.
+    """
     model = Sequential(
         [Conv2D(input_shape=input_size, filters=32, kernel_size=8, strides=4, padding='valid',
-                kernel_initializer=GlorotNormal, activation='relu'),
-         Conv2D(filters=64, kernel_size=4, strides=2, padding='valid', kernel_initializer=GlorotNormal,
-                activation='relu'),
-         Conv2D(filters=128, kernel_size=3, strides=1, padding='valid', kernel_initializer=GlorotNormal,
-                activation='relu'),
+                kernel_initializer=VarianceScaling(2.0), activation='relu', use_bias=False),
+         Conv2D(filters=64, kernel_size=4, strides=2, padding='valid',
+                kernel_initializer=VarianceScaling(2.0), activation='relu', use_bias=False),
+         Conv2D(filters=64, kernel_size=3, strides=1, padding='valid',
+                kernel_initializer=VarianceScaling(2.0), activation='relu', use_bias=False),
+         Conv2D(filters=1024, kernel_size=7, strides=1, padding='valid',
+                kernel_initializer=VarianceScaling(2.0), activation='relu', use_bias=False),
          Flatten(),
-         Dense(units=512, activation='elu', kernel_initializer=GlorotNormal),
+         Dense(units=512, activation='elu', kernel_initializer=VarianceScaling(2.0)),
          Dense(units=n_actions, activation=None)])
     model.compile(optimizer=Adam(learning_rate=lr), loss='mean_squared_error')
 
@@ -73,6 +85,11 @@ def preprocess_frame(frame):
 
 
 def stack_frames(stacked_frames, state, is_new_episode):
+    """
+    Method abstracted from 'https://github.com/simoninithomas/Deep_reinforcement_learning_Course/blob/master/Deep%20Q%20Learning/Space%20Invaders/DQN%20Atari%20Space%20Invaders.ipynb'
+    Modified for cropped images that discard the side and top of the Breakout game screen.
+    Frame stacking used as per the guide
+    """
     frame = preprocess_frame(state)
 
     if is_new_episode:
@@ -93,6 +110,9 @@ def stack_frames(stacked_frames, state, is_new_episode):
 
 
 class Agent:
+    """
+    Agent abstracted from https://www.youtube.com/watch?v=SMZfgeHFFcA
+    """
     def __init__(self, lr, gamma, n_actions, epsilon, batch_size,
                  input_dims, epsilon_dec=1e-3, epsilon_end=0.01,
                  mem_size=1000000, model_file='dqn_model.h5'):
