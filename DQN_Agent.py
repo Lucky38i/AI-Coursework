@@ -40,9 +40,9 @@ class ReplayBuffer:
         return states, actions, rewards, next_state, terminal
 
 
-def build_dqn(lr, n_actions, input_dims, fc1_dims, fc2_dims):
+def build_dqn(lr, n_actions, inputs_dims, fc1_dims, fc2_dims):
     model = Sequential([
-        Dense(fc1_dims, activation='relu'),
+        Dense(fc1_dims, activation='relu', input_shape=inputs_dims),
         Dense(fc2_dims, activation='relu'),
         Dense(n_actions, activation=None)])
     model.compile(optimizer=Adam(learning_rate=lr), loss='mean_squared_error')

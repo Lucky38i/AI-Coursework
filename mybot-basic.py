@@ -3,18 +3,20 @@
 #######################################################
 import io
 import json
-import os
 import string
 import warnings
+import gym
 
 import aiml
 import nltk
 from keras.models import load_model
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import tensorflow as tf
 
-from ImageClassification_Training import preprocess_image
 import Transformer_Training as tt
+from DQN_Agent import Agent
+from ImageClassification_Training import preprocess_image
 
 # Unsafe
 warnings.filterwarnings("ignore")
@@ -69,8 +71,8 @@ def lem_normalize(text):
 #######################################################
 #  Transformer Model Interface
 #######################################################
-encoder_path = "data/checkpoints/encoder_epoch_68.h5"
-decoder_path = "data/checkpoints/decoder_epoch_68.h5"
+encoder_path = "data/checkpoints/encoder_epoch_67.h5"
+decoder_path = "data/checkpoints/decoder_epoch_67.h5"
 
 dataset, info = tt.create_dataset(tt.BATCH_SIZE)
 encoder, decoder = tt.create_transformer(info['vocab_size'], tt.MODEL_SIZE,
@@ -79,7 +81,18 @@ encoder.load_weights(encoder_path)
 decoder.load_weights(decoder_path)
 
 print(info)
-
+#######################################################
+#  Reinforcement Learning (DQN) Interface
+#######################################################
+dqn_model_file = "data/models/dqn_MountainCar_model.h5"
+tf.compat.v1.disable_eager_execution()
+env = gym.make('MountainCar-v0')
+lr = 0.001
+n_games = 10
+agent = Agent(gamma=0.91, epsilon=0.1, lr=lr, input_dims=env.observation_space.shape,
+              n_actions=env.action_space.n, mem_size=1000000, batch_size=64, epsilon_end=0.01,
+              model_file=dqn_model_file, epsilon_dec=1e-3)
+agent.load_model()
 #######################################################
 #  POL model Interface
 #######################################################
@@ -252,6 +265,19 @@ while True:
             for label, num in label_map.items():
                 if num == classes:
                     print("Uhhh... This looks like a(n)", label)
+
+        elif cmd == 15:
+            for i in range(n_games):
+                done = False
+                score = 0
+                observation = env.reset()
+                while not done:
+                    env.render()
+                    action = agent.choose_action(observation)
+                    next_observation, reward, done, info = env.step(action)
+                    observation = next_observation
+            env.close()
+            print("Pretty sweet huh?")
 
         elif cmd == 99:
             input_sentence = [userInput]

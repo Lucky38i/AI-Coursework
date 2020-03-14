@@ -2,17 +2,21 @@ from DQN_Agent import Agent
 import numpy as np
 import gym
 import tensorflow as tf
+import os
 
-file_locations = "data/models/dqn_model.h5"
+model_file = "data/models/dqn_MountainCar_model.h5"
 
 if __name__ == '__main__':
     tf.compat.v1.disable_eager_execution()
-    env = gym.make('LunarLanderContinuous-v2')
-    lr = 0.001
+    env = gym.make('MountainCar-v0')
+    lr = 0.0001
     n_games = 500
-    agent = Agent(gamma=0.99, epsilon=1.0, lr=lr, input_dims=env.observation_space.shape,
-                  n_actions=env.action_space.n, mem_size=1000000, batch_size=64, epsilon_end=0.01,
-                  model_file=file_locations)
+    agent = Agent(gamma=0.98, epsilon=0.01, lr=lr, input_dims=env.observation_space.shape,
+                  n_actions=env.action_space.n, mem_size=1000000, batch_size=128, epsilon_end=0.01,
+                  model_file=model_file, epsilon_dec=1e-3)
+    if os.path.isfile(model_file):
+        print("Loading existing Model")
+        agent.load_model()
     scores = []
     eps_history = []
     for i in range(n_games):
@@ -20,7 +24,7 @@ if __name__ == '__main__':
         score = 0
         observation = env.reset()
         while not done:
-            env.render()
+            # env.render()
             action = agent.choose_action(observation)
             next_observation, reward, done, info = env.step(action)
             score += reward
@@ -34,4 +38,4 @@ if __name__ == '__main__':
         print('episode: ', i, 'score %.2f' % score,
               'average_score %.2f' % avg_score,
               'epsilon %.2f' % agent.epsilon)
-        agent.save_model()
+    agent.save_model()

@@ -142,6 +142,13 @@
   </template>
 </category>
 
+<!-- DQN Network -->
+<category>
+    <pattern> PLAY A GAME </pattern>
+    <template>
+        #15$
+    </template>
+</category>
 
 <!-- Image Classification -->
 <category>
