@@ -6,7 +6,7 @@ import os
 from collections import deque
 
 # File Location
-model_file = "data/models/dqn_Breakout_Modified_model.h5"
+model_file = "data/models/dqn_Breakout_model.h5"
 
 # Model Hyperparameters
 state_size = [179, 144, 4]
@@ -15,11 +15,11 @@ state_size = [179, 144, 4]
 stack_size = 4
 
 # Training Hyperparameters
-lr = 0.00001
-n_games = 500
-gamma = 0.99
-epsilon = 1
-decay = 1e-5
+lr = 0.0000625
+n_games = 18000
+gamma = 0.98
+epsilon = 0.01
+decay = 0.000001
 epsilon_end = 0.01
 batch_size = 64
 
@@ -38,6 +38,7 @@ if __name__ == '__main__':
 
     scores = []
     eps_history = []
+    saver_iter = 0
     for i in range(n_games):
         done = False
         score = 0
@@ -62,5 +63,9 @@ if __name__ == '__main__':
               'average_score %.2f' % avg_score,
               'epsilon %.2f' % agent.epsilon)
 
-        if i == 50:    # Saves after 50 episodes
+        if saver_iter == 25:
             agent.save_model()
+            print('Saved Model')
+            saver_iter = 0
+        
+        saver_iter += 1

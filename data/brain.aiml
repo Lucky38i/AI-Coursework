@@ -144,7 +144,14 @@
 
 <!-- DQN Network -->
 <category>
-    <pattern> PLAY A GAME </pattern>
+    <pattern> PLAY MOUNTAIN CLIMBER </pattern>
+    <template>
+        #15$
+    </template>
+</category>
+
+<category>
+    <pattern> PLAY BREAKOUT </pattern>
     <template>
         #15$
     </template>

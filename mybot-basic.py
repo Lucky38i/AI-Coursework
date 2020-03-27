@@ -12,10 +12,13 @@ import nltk
 from keras.models import load_model
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from collections import deque
 import tensorflow as tf
+import numpy as np
 
 import Transformer_Training as tt
-from DQN_Agent import Agent
+from DQN_Agent import Agent as HillAgent
+from DQN_Agent_Images import Agent as BreakoutAgent, stack_frames
 from ImageClassification_Training import preprocess_image
 
 # Unsafe
@@ -84,15 +87,23 @@ print(info)
 #######################################################
 #  Reinforcement Learning (DQN) Interface
 #######################################################
-dqn_model_file = "data/models/dqn_MountainCar_model.h5"
+dqn_hill_model_file = "data/models/dqn_MountainCar_model.h5"
+dqn_breakout_model_file = "data/models/dqn_Breakout_model.h5"
 tf.compat.v1.disable_eager_execution()
-env = gym.make('MountainCar-v0')
+hillEnv = gym.make('MountainCar-v0')
+breakoutEnv = gym.make('Breakout-v0')
 lr = 0.001
 n_games = 10
-agent = Agent(gamma=0.91, epsilon=0.1, lr=lr, input_dims=env.observation_space.shape,
-              n_actions=env.action_space.n, mem_size=1000000, batch_size=64, epsilon_end=0.01,
-              model_file=dqn_model_file, epsilon_dec=1e-3)
-agent.load_model()
+hillAgent = HillAgent(gamma=0.91, epsilon=0.1, lr=lr, input_dims=hillEnv.observation_space.shape,
+                      n_actions=hillEnv.action_space.n, mem_size=1000000, batch_size=64, epsilon_end=0.01,
+                      model_file=dqn_hill_model_file, epsilon_dec=1e-3)
+breakoutAgent = BreakoutAgent(gamma=0.96, epsilon=0.01, lr=0.0000625, input_dims=[179, 144, 4],
+                              n_actions=breakoutEnv.action_space.n, mem_size=1000, batch_size=64, epsilon_end=0.01,
+                              model_file=dqn_breakout_model_file, epsilon_dec=0.000001)
+stacked_frames = deque([np.zeros((179, 144), dtype=np.int) for i in range(4)], maxlen=4)
+
+hillAgent.load_model()
+breakoutAgent.load_model()
 #######################################################
 #  POL model Interface
 #######################################################
@@ -162,7 +173,8 @@ welcomeMessage = ("Welcome to the Cayman Islands Chat Bot!"
                   " it's geography, national animals and so on."
                   "\n\n** NEW UPDATE **"
                   "\nMy owner has implemented a Transformer Model to train me on the SQuAD"
-                  "\nDataset!, refer to their explore page for questions you can ask me.")
+                  "\nDataset!, refer to their explore page for questions you can ask me."
+                  "\nI've been trained on how to play games! ask me to play mountain climber or breakout!")
 print(welcomeMessage)
 #######################################################
 # Main loop
@@ -270,14 +282,29 @@ while True:
             for i in range(n_games):
                 done = False
                 score = 0
-                observation = env.reset()
+                observation = hillEnv.reset()
                 while not done:
-                    env.render()
-                    action = agent.choose_action(observation)
-                    next_observation, reward, done, info = env.step(action)
+                    hillEnv.render()
+                    action = hillAgent.choose_action(observation)
+                    next_observation, reward, done, info = hillEnv.step(action)
                     observation = next_observation
-            env.close()
+            hillEnv.close()
             print("Pretty sweet huh?")
+
+        elif cmd == 16:
+            for i in range(n_games):
+                done = False
+                score = 0
+                observation = breakoutEnv.reset()
+                observation, stacked_frame = stack_frames(stacked_frames, observation, True)
+                while not done:
+                    breakoutEnv.render()
+                    # Training developed from https://www.youtube.com/watch?v=SMZfgeHFFcA
+                    # with modifications to for frame stacking
+                    action = breakoutAgent.choose_action(observation)
+                    next_observation, reward, done, info = breakoutEnv.step(action)
+                    next_observation, stacked_frame = stack_frames(stacked_frames, next_observation, False)
+                    observation = next_observation
 
         elif cmd == 99:
             input_sentence = [userInput]
